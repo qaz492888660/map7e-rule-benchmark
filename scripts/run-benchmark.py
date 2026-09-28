@@ -21,6 +21,7 @@ import random
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -48,6 +49,7 @@ EXPERIMENT_CONFIG: dict[str, Any] = {}
 ACCEPTED_RULE_STATUSES = {"ORIGINAL_VERBATIM", "VERIFIED_INPUT", "VERIFIED_CANDIDATE_FROM_RESEARCH_REPORT"}
 MAX_TOOL_ROUNDS = 8
 MAX_TOOL_OUTPUT_CHARS = 30000
+RUNTIME_CONFIG: dict[str, Any] = {}
 
 
 def utc_now() -> str:
@@ -119,6 +121,7 @@ def configure_experiment(config_path: str | None) -> None:
     """Select an isolated experiment data root while sharing versioned project fixtures."""
     global ROOT, RUNS, RULE_NAMES, RUN_ID_CODES, RULE_PATHS
     global TESTCASES_PATH, RUN_PLAN_PATH, RULES_MANIFEST_PATH, FIXTURES_ROOT, EXPERIMENT_CONFIG
+    global RUNTIME_CONFIG, API_URL, MAX_TOOL_ROUNDS
     if not config_path:
         return
     path = Path(config_path).resolve()
@@ -152,6 +155,15 @@ def configure_experiment(config_path: str | None) -> None:
     RULES_MANIFEST_PATH = resolve(config.get("rules_manifest_path", "rules-manifest.json"))
     FIXTURES_ROOT = resolve(config.get("fixtures_root", "../../fixtures"))
     EXPERIMENT_CONFIG = config
+    runtime_config_path = config.get("runtime_config_path")
+    if not isinstance(runtime_config_path, str) or not runtime_config_path:
+        raise ValueError("experiment config must select a runtime_config_path")
+    RUNTIME_CONFIG = read_json(resolve(runtime_config_path))
+    endpoint = RUNTIME_CONFIG.get("api", {}).get("endpoint")
+    if not isinstance(endpoint, str) or not endpoint.startswith("https://"):
+        raise ValueError("runtime config must define an HTTPS API endpoint")
+    API_URL = endpoint
+    MAX_TOOL_ROUNDS = int(RUNTIME_CONFIG.get("request", {}).get("max_tool_rounds", 8))
 
 
 def repo_relative(path: Path) -> str:
@@ -215,9 +227,64 @@ def validate_layout() -> dict[str, Any]:
             usable[rule] = False
     if len(hashes) == 2 and len(set(hashes.values())) != 2:
         errors.append("the two experiment rule hashes must differ")
-    fixed_parameters = EXPERIMENT_CONFIG.get("model_parameters", {})
-    model_parameters_pinned = bool(fixed_parameters.get("model_id") and fixed_parameters.get("reasoning_effort")) if EXPERIMENT_CONFIG else True
+    api_config = RUNTIME_CONFIG.get("api", {})
+    reasoning_config = RUNTIME_CONFIG.get("reasoning", {})
+    model_parameters_pinned = bool(api_config.get("exact_model_id") and reasoning_config.get("effort")) if EXPERIMENT_CONFIG else True
+    tool_config = RUNTIME_CONFIG.get("tools", {})
+    actual_catalog = {"native": tool_config.get("native_api_tools", []), "functions": local_tool_specs()}
+    configured_catalog = {"native": tool_config.get("native_api_tools", []), "functions": tool_config.get("benchmark_function_tools", [])}
+    actual_catalog_hash = sha256(json.dumps(actual_catalog, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")) if RUNTIME_CONFIG else ""
+    tool_catalog_matches = (
+        bool(tool_config.get("catalog_sha256"))
+        and configured_catalog == actual_catalog
+        and actual_catalog_hash == tool_config.get("catalog_sha256")
+    )
+    if RUNTIME_CONFIG and not tool_catalog_matches:
+        errors.append("runtime tool catalog hash does not match the runner tool definitions")
+    baseline_hash_matches = (
+        not RUNTIME_CONFIG
+        or RUNTIME_CONFIG.get("shared_instruction", {}).get("sha256") == sha256(BASELINE.encode("utf-8"))
+    )
+    if RUNTIME_CONFIG and not baseline_hash_matches:
+        errors.append("runtime shared-instruction hash does not match the runner baseline")
+    environment = RUNTIME_CONFIG.get("execution_environment", {})
+    runner_hash_matches = (
+        not RUNTIME_CONFIG
+        or environment.get("runner_sha256") == sha256(Path(__file__).read_bytes())
+    )
+    if environment.get("mode") == "github_actions":
+        runtime_environment_matches = (
+            os.environ.get("GITHUB_ACTIONS") == "true"
+            and os.environ.get("RUNNER_OS") == "Linux"
+            and f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}" == environment.get("python_version")
+            and runner_hash_matches
+        )
+    else:
+        runtime_environment_matches = (
+            not RUNTIME_CONFIG
+            or (
+                environment.get("python_version") == sys.version
+                and environment.get("platform") == platform.platform()
+                and runner_hash_matches
+            )
+        )
+    generation = RUNTIME_CONFIG.get("generation", {})
+    temperature_status = str(generation.get("temperature", {}).get("status", ""))
+    temperature_policy_valid = (
+        not RUNTIME_CONFIG
+        or (
+            reasoning_config.get("effort") == "none"
+            or temperature_status.startswith("OMITTED")
+        )
+    )
+    if RUNTIME_CONFIG and not temperature_policy_valid:
+        errors.append("temperature must be omitted when the frozen reasoning effort is not none")
+    runtime_frozen = RUNTIME_CONFIG.get("config_status") == "FROZEN"
     api_credential_available = bool(os.environ.get("OPENAI_API_KEY"))
+    model_callable = api_config.get("callability", {}).get("status") == "VERIFIED_CALLABLE"
+    durable_persistence_verified = RUNTIME_CONFIG.get("persistence", {}).get("durable_persistence") == "VERIFIED"
+    readiness_path = ROOT / EXPERIMENT_CONFIG.get("readiness_path", "runner-readiness.json") if EXPERIMENT_CONFIG else None
+    readiness_status = read_json(readiness_path).get("status") if readiness_path and readiness_path.exists() else None
     return {
         "valid_structure": not errors,
         "errors": errors,
@@ -228,8 +295,17 @@ def validate_layout() -> dict[str, Any]:
         "rules_complete": complete,
         "rules_usable_for_selected_experiment": usable,
         "model_parameters_pinned": model_parameters_pinned,
+        "runtime_config_frozen": runtime_frozen,
+        "tool_catalog_matches_runner": tool_catalog_matches,
+        "shared_instruction_matches_runner": baseline_hash_matches,
+        "execution_environment_matches": runtime_environment_matches,
+        "runner_hash_matches": runner_hash_matches,
+        "temperature_policy_valid": temperature_policy_valid,
+        "model_callable_verified": model_callable,
+        "durable_persistence_verified": durable_persistence_verified,
+        "readiness_status": readiness_status,
         "api_credential_available": api_credential_available,
-        "ready_for_model_request": not errors and all(complete.values()) and all(usable.values()) and model_parameters_pinned and api_credential_available,
+        "ready_for_model_request": not errors and all(complete.values()) and all(usable.values()) and model_parameters_pinned and runtime_frozen and tool_catalog_matches and baseline_hash_matches and runtime_environment_matches and model_callable and durable_persistence_verified and readiness_status == "READY_FOR_PILOT" and api_credential_available,
     }
 
 
@@ -501,7 +577,19 @@ def git(args: list[str], timeout: int = 45) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.pop("OPENAI_API_KEY", None)
     env["GIT_TERMINAL_PROMPT"] = "0"
-    return subprocess.run(["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=timeout, env=env)
+    askpass_path: str | None = None
+    if env.get("GITHUB_TOKEN"):
+        fd, askpass_path = tempfile.mkstemp(prefix="benchmark-git-askpass-")
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write("#!/bin/sh\ncase \"$1\" in\n  *sername*) printf '%s\\n' 'x-access-token' ;;\n  *assword*) printf '%s\\n' \"$GITHUB_TOKEN\" ;;\n  *) exit 1 ;;\nesac\n")
+        os.chmod(askpass_path, 0o700)
+        env["GIT_ASKPASS"] = askpass_path
+        env["GIT_ASKPASS_REQUIRE"] = "force"
+    try:
+        return subprocess.run(["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=timeout, env=env)
+    finally:
+        if askpass_path:
+            Path(askpass_path).unlink(missing_ok=True)
 
 
 def ensure_main_worktree() -> None:
@@ -512,8 +600,8 @@ def ensure_main_worktree() -> None:
         raise RuntimeError("Durable execution requires a Git worktree")
     if branch.returncode != 0 or branch.stdout.strip() != "main":
         raise RuntimeError("Durable execution requires the main branch")
-    if origin.returncode != 0:
-        raise RuntimeError("Durable execution requires origin remote")
+    if origin.returncode != 0 or not origin.stdout.strip().startswith("https://github.com/"):
+        raise RuntimeError("Durable execution requires an HTTPS GitHub origin remote")
     staged = git(["diff", "--cached", "--name-only"])
     if staged.returncode != 0 or staged.stdout.strip():
         raise RuntimeError("Durable execution requires an empty Git index; commit unrelated staged changes first")
@@ -680,7 +768,7 @@ def persist_raw(entry: dict[str, Any], raw_path: Path, raw: bytes, record: dict[
 
 def response_loop(case: dict[str, Any], instruction: str, initial_input: list[dict[str, Any]],
                   tools: list[dict[str, Any]], workspace: Path, model: str, reasoning: str,
-                  temperature: float, max_tokens: int, timeout: int, api_key: str) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], str]:
+                  temperature: float | None, max_tokens: int, timeout: int, api_key: str) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], str]:
     full_input = list(initial_input)
     trace: list[dict[str, Any]] = []
     tool_calls_log: list[dict[str, Any]] = []
@@ -695,10 +783,11 @@ def response_loop(case: dict[str, Any], instruction: str, initial_input: list[di
             "input": full_input,
             "tools": tools,
             "reasoning": {"effort": reasoning},
-            "temperature": temperature,
             "max_output_tokens": max_tokens,
             "store": False,
         }
+        if temperature is not None:
+            payload["temperature"] = temperature
         # No previous_response_id or conversation/session identifier is sent.
         trace.append({"kind": "api_request", "round": round_no, "payload": payload})
         try:
@@ -775,26 +864,23 @@ def execute_entry(entry: dict[str, Any], case: dict[str, Any], dry_run: bool) ->
         raise RuntimeError(f"{entry['rule']} source is MISSING_INPUT; model request blocked")
     if dry_run:
         return {"run_id": entry["run_id"], "dry_run": True, "model_request_made": False, "rule_hash": rule_hash, "case_id": case["id"], "input": case["input"], "tools": sorted(tool_names_for(case))}
+    if not layout["ready_for_model_request"]:
+        raise RuntimeError("READY_FOR_PILOT gate is not satisfied; real model requests are blocked")
     api_key = os.environ.get("OPENAI_API_KEY", "")
-    fixed = EXPERIMENT_CONFIG.get("model_parameters", {})
-    model = str(fixed.get("model_id") or os.environ.get("BENCHMARK_MODEL_ID", ""))
-    reasoning = str(fixed.get("reasoning_effort") or os.environ.get("BENCHMARK_REASONING_EFFORT", ""))
-    if EXPERIMENT_CONFIG and (not fixed.get("model_id") or not fixed.get("reasoning_effort")):
-        raise RuntimeError("experiment config must pin model_id and reasoning_effort before any model request")
+    api_config = RUNTIME_CONFIG["api"]
+    reasoning_config = RUNTIME_CONFIG["reasoning"]
+    request_config = RUNTIME_CONFIG["request"]
+    generation_config = RUNTIME_CONFIG["generation"]
+    model = str(api_config["exact_model_id"])
+    reasoning = str(reasoning_config["effort"])
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is required via environment variable; no key is stored in files")
-    if not model:
-        raise RuntimeError("BENCHMARK_MODEL_ID must pin the model snapshot via environment variable")
-    if not reasoning:
-        raise RuntimeError("BENCHMARK_REASONING_EFFORT must be fixed via environment variable")
-    try:
-        temperature = float(fixed.get("temperature", os.environ.get("BENCHMARK_TEMPERATURE", "0.2")))
-        max_tokens = int(fixed.get("max_output_tokens", os.environ.get("BENCHMARK_MAX_OUTPUT_TOKENS", "2000")))
-        timeout = int(fixed.get("request_timeout_seconds", os.environ.get("BENCHMARK_REQUEST_TIMEOUT", "120")))
-    except ValueError as exc:
-        raise RuntimeError(f"Invalid fixed model parameter in environment: {exc}") from exc
-    if not 0 <= temperature <= 2 or max_tokens < 1 or timeout < 1:
-        raise RuntimeError("Invalid temperature/token/timeout configuration")
+    temperature_spec = generation_config.get("temperature", {"status": "OMITTED"})
+    temperature = None if str(temperature_spec.get("status", "OMITTED")).startswith("OMITTED") else float(temperature_spec["value"])
+    max_tokens = int(generation_config["max_output_tokens"])
+    timeout = int(request_config["timeout_seconds"])
+    if (temperature is not None and not 0 <= temperature <= 2) or max_tokens < 1 or timeout < 1:
+        raise RuntimeError("Invalid frozen runtime parameter")
 
     workspace = copy_workspace(case["id"], entry["run_id"])
     user_input, attachment_records = make_request_input(case, case["id"], workspace)
@@ -818,9 +904,17 @@ def execute_entry(entry: dict[str, Any], case: dict[str, Any], dry_run: bool) ->
     record = {
         "run_id": entry["run_id"], "testcase_id": case["id"], "rule_version": entry["rule"], "rule_hash": rule_hash,
         "model": actual_model, "model_requested": model, "reasoning_setting": reasoning,
-        "model_parameters": {"temperature": temperature, "max_output_tokens": max_tokens, "request_timeout_seconds": timeout, "store": False, "previous_response_id": None},
+        "model_parameters": {"temperature": temperature, "temperature_status": temperature_spec.get("status", "OMITTED"), "max_output_tokens": max_tokens, "request_timeout_seconds": timeout, "store": False, "previous_response_id": None, "api_endpoint": API_URL},
         "tool_permissions": tool_permissions_for(case), "tool_policy": case.get("tool_policy", {}),
-        "execution_environment": {"python_version": sys.version, "platform": platform.platform(), "runner_sha256": sha256(Path(__file__).read_bytes())},
+        "execution_environment": {
+            "python_version": sys.version,
+            "platform": platform.platform(),
+            "runner_sha256": sha256(Path(__file__).read_bytes()),
+            "github_actions": os.environ.get("GITHUB_ACTIONS") == "true",
+            "runner_os": os.environ.get("RUNNER_OS"),
+            "image_os": os.environ.get("ImageOS"),
+            "image_version": os.environ.get("ImageVersion"),
+        },
         "testcase_sha256": sha256(json_bytes(case)), "input": case["input"], "input_payload": user_input,
         "attachments": attachment_records, "initial_workspace_snapshot": initial_workspace_snapshot,
         "final_workspace_snapshot": snapshot_workspace(workspace),

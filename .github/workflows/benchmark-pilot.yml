@@ -1,0 +1,91 @@
+name: Benchmark runtime (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Select one explicit runtime mode
+        required: true
+        type: choice
+        default: static_validation
+        options:
+          - static_validation
+          - persistence_smoke
+          - api_smoke
+          - pilot
+
+permissions:
+  contents: write
+
+concurrency:
+  group: map7e-rule-benchmark
+  cancel-in-progress: false
+
+jobs:
+  benchmark-runtime:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout main with the default Actions token
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ github.token }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up pinned Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.14'
+          cache: pip
+          cache-dependency-path: requirements-benchmark.txt
+
+      - name: Install locked runtime dependencies
+        run: python -m pip install --disable-pip-version-check --requirement requirements-benchmark.txt
+
+      - name: Require API credential for API modes
+        if: inputs.mode == 'api_smoke' || inputs.mode == 'pilot'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        shell: bash
+        run: |
+          if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+            echo "::error title=OPENAI_API_KEY_MISSING::OPENAI_API_KEY_MISSING"
+            exit 1
+          fi
+
+      - name: Set commit identity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Compile and validate benchmark runtime without model calls
+        run: |
+          python -m py_compile scripts/run-benchmark.py scripts/score-results.py scripts/benchmark-actions.py
+          python -m pip check
+          python scripts/benchmark-actions.py static-check --github-runtime
+
+      - name: GitHub persistence create-push-readback-delete smoke
+        id: persistence-smoke
+        if: inputs.mode == 'persistence_smoke'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/benchmark-actions.py persistence-smoke
+
+      - name: One non-experimental API smoke request
+        id: api-smoke
+        if: inputs.mode == 'api_smoke'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/benchmark-actions.py api-smoke
+
+      - name: Two-run T01 pilot
+        id: pilot
+        if: inputs.mode == 'pilot'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/benchmark-actions.py pilot

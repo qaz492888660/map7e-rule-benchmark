@@ -22,23 +22,16 @@
   "runs_dir": "runs",
   "readiness_path": "runner-readiness.json",
   "scorer_path": "../../scripts/score-results.py",
-  "model_parameters": {
-    "model_id": null,
-    "reasoning_effort": null,
-    "temperature": 0.2,
-    "max_output_tokens": 2000,
-    "request_timeout_seconds": 120,
-    "store": false,
-    "previous_response_id": null
-  },
   "controls": {
     "only_rule_text_varies": true,
     "testcase_source": "../../testcases.json (shared byte-identical source)",
     "fixtures_source": "../../fixtures (shared immutable source)",
-    "tool_permissions": "Derived from the same testcase tool_policy and runner tool catalog for both rules.",
-    "execution_environment": "Runner code hash, Python version, and platform will be recorded per run; host/runtime is not pinned across future execution sessions.",
+    "tool_permissions": "Same testcase-specific tool policy and runner tool catalog for both variants; hosted web_search and API behavior await live validation.",
+    "execution_environment": "GitHub Actions ubuntu-24.04 with exact Python 3.12.14; actual hosted image version is recorded per raw run and awaits runtime validation.",
     "scorer_source": "../../scripts/score-results.py",
     "formal_runs_started": false,
-    "pilot_started": false
-  }
+    "pilot_started": false,
+    "runtime_config": "runtime-config.json (frozen shared configuration; only rule body varies)"
+  },
+  "runtime_config_path": "runtime-config.json"
 }
