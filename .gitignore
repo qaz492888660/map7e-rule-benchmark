@@ -1,0 +1,36 @@
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*api*key*
+*token*
+*credential*
+*secret*
+credentials.json
+secrets.json
+cookies.txt
+cookie*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python caches and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+.coverage
+
+# Local virtual environments
+.venv/
+venv/
+env/
+
+# Temporary files and logs
+*.tmp
+*.temp
+*.swp
+*.log
