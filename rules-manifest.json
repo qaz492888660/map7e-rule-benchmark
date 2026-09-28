@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "rules": {
+    "OLD": {
+      "source_status": "MISSING_INPUT",
+      "sha256": "333a70cd5b37618dabc14c207d05aaf578b72eed4b9a14c22d892ba3eec911c2",
+      "character_count": 245,
+      "line_count": 3,
+      "usable_for_ab": false
+    },
+    "NEW22": {
+      "source_status": "MISSING_INPUT",
+      "sha256": "e73c9037a3bd465c99cf98b7a647d56c0ba4da6831efc5ad9f87242ad32c7fe0",
+      "character_count": 262,
+      "line_count": 3,
+      "usable_for_ab": false
+    }
+  },
+  "comparison_ready": false,
+  "note": "Hashes identify only the explicit MISSING_INPUT marker files, not the original rule texts."
+}

@@ -28,9 +28,14 @@ coverage/
 .venv/
 venv/
 env/
+.codex/
 
 # Temporary files and logs
 *.tmp
 *.temp
 *.swp
 *.log
+*.bak
+.DS_Store
+runs/.work/
+runs/.locks/

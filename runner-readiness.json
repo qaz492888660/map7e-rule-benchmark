@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "status": "NOT_READY",
+  "formal_runs_completed": 0,
+  "pilot_runs_completed": 0,
+  "model_calls_made_during_build": false,
+  "blockers": [
+    {
+      "item": "OLD source",
+      "status": "MISSING_INPUT",
+      "evidence": "Available project files and personal-context retrieval did not contain the complete verbatim OLD rules. rules/OLD.md contains only a clearly labeled marker."
+    },
+    {
+      "item": "NEW22 source",
+      "status": "MISSING_INPUT",
+      "evidence": "Available project files and personal-context retrieval did not contain the complete verbatim official 22-rule text. rules/NEW22.md contains only a clearly labeled marker."
+    },
+    {
+      "item": "Pinned model/API configuration",
+      "status": "NOT_LIVE_VERIFIED",
+      "evidence": "The runner is implemented for the OpenAI Responses API and reads OPENAI_API_KEY, BENCHMARK_MODEL_ID, and BENCHMARK_REASONING_EFFORT from the execution environment. No real API request was made."
+    },
+    {
+      "item": "Tool trace behavior",
+      "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
+      "evidence": "The runner stores raw API responses and function tool calls/results; the built-in web_search trace and provider response format have not been validated with a live request."
+    },
+    {
+      "item": "Runtime Git push/readback",
+      "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
+      "evidence": "The runner commits, pushes to origin/main, fetches, reads back raw files, and records a remote-verification receipt. This Work shell could not establish Git transport to GitHub during setup; GitHub connector writes were separately verified."
+    }
+  ],
+  "pilot_requirements": [
+    "Supply the exact complete OLD and official NEW22 rule texts.",
+    "Configure OPENAI_API_KEY as an environment variable in the runner host; do not put it in chat, code, Git, or logs.",
+    "Pin BENCHMARK_MODEL_ID to a model snapshot that supports Responses API web_search and configure one BENCHMARK_REASONING_EFFORT for both rules.",
+    "Keep temperature and max output tokens fixed for both rules (defaults are BENCHMARK_TEMPERATURE=0.2 and BENCHMARK_MAX_OUTPUT_TOKENS=2000 unless explicitly set).",
+    "Run from a clone/worktree with authenticated Git push and fetch/readback access to the existing origin/main."
+  ],
+  "formal_experiment_started": false,
+  "reason": "Rule sources are not available, so even a pilot cannot be a valid OLD vs NEW22 comparison."
+}

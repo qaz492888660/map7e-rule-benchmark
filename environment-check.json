@@ -1,0 +1,41 @@
+{
+  "independent_rule_injection": {
+    "status": "FAIL",
+    "evidence": "当前工作目录只有 .codex/config.toml，没有 rules/OLD.md 或 rules/NEW22.md；当前可用工具清单也没有用于独立模型生成请求的 API/session 创建接口，无法验证每次请求仅注入对应规则。"
+  },
+  "independent_sessions": {
+    "status": "FAIL",
+    "evidence": "当前环境没有可调用的独立模型请求/session 创建接口；不能创建互不继承上下文的实验运行。"
+  },
+  "fixed_model": {
+    "status": "FAIL",
+    "evidence": "未发现 OPENAI_API_KEY 或 BENCHMARK_MODEL_ID 环境变量；没有模型调用端点可核验模型 ID、版本及 sampling 参数。"
+  },
+  "fixed_reasoning": {
+    "status": "FAIL",
+    "evidence": "未发现 BENCHMARK_REASONING_EFFORT 环境变量，也没有可逐次设置并读取 reasoning effort 的模型请求接口。"
+  },
+  "identical_tools": {
+    "status": "FAIL",
+    "evidence": "当前 Work 工具不能作为独立模型请求的可配置工具权限集；无法为 OLD 与 NEW22 两组配置并核验相同权限。"
+  },
+  "identical_inputs": {
+    "status": "FAIL",
+    "evidence": "当前目录没有 testcases.json 或附件/测试资源；且没有可将固定输入回放到独立模型请求的接口，无法验证配对输入。"
+  },
+  "repeatable_runs": {
+    "status": "FAIL",
+    "evidence": "当前没有独立模型请求接口，不能执行同一 testcase 的五次独立重复运行。"
+  },
+  "execution_trace_available": {
+    "status": "FAIL",
+    "evidence": "当前不能发起受控模型请求，也无法取得这些请求对应的 API response、tool-call/tool-result 或 agent trajectory。"
+  },
+  "experiment_status": "ENVIRONMENT_BLOCKED",
+  "design_status": "DESIGN_ONLY / ENVIRONMENT_BLOCKED",
+  "formal_runs_started": false,
+  "pilot_runs_started": false,
+  "completed_runs": 0,
+  "target_runs": 200,
+  "checked_at": "2026-09-28T18:01:45+08:00"
+}

@@ -1,0 +1,6 @@
+{
+  "release_channel": "beta",
+  "banner": "Maintenance scheduled",
+  "maintenance_mode": true,
+  "version": "1.4.2"
+}
