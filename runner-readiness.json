@@ -8,12 +8,12 @@
     {
       "item": "OLD source",
       "status": "MISSING_INPUT",
-      "evidence": "Available project files and personal-context retrieval did not contain the complete verbatim OLD rules. rules/OLD.md contains only a clearly labeled marker."
+      "evidence": "rules/OLD.md still contains only the explicit MISSING_INPUT marker. No exact complete OLD source has been supplied."
     },
     {
-      "item": "NEW22 source",
-      "status": "MISSING_INPUT",
-      "evidence": "Available project files and personal-context retrieval did not contain the complete verbatim official 22-rule text. rules/NEW22.md contains only a clearly labeled marker."
+      "item": "NEW22 runner status compatibility",
+      "status": "IMPLEMENTATION_MISMATCH",
+      "evidence": "rules-manifest.json records the supplied source as VERIFIED_INPUT as required. scripts/run-benchmark.py currently treats only ORIGINAL_VERBATIM as a complete source status. The runner would therefore continue to mark NEW22 incomplete until this status handling is reconciled; no runner file was changed in this rules-baseline update."
     },
     {
       "item": "Pinned model/API configuration",
@@ -32,12 +32,12 @@
     }
   ],
   "pilot_requirements": [
-    "Supply the exact complete OLD and official NEW22 rule texts.",
-    "Configure OPENAI_API_KEY as an environment variable in the runner host; do not put it in chat, code, Git, or logs.",
-    "Pin BENCHMARK_MODEL_ID to a model snapshot that supports Responses API web_search and configure one BENCHMARK_REASONING_EFFORT for both rules.",
-    "Keep temperature and max output tokens fixed for both rules (defaults are BENCHMARK_TEMPERATURE=0.2 and BENCHMARK_MAX_OUTPUT_TOKENS=2000 unless explicitly set).",
-    "Run from a clone/worktree with authenticated Git push and fetch/readback access to the existing origin/main."
+    "Supply the exact complete OLD rule text; do not reconstruct it from summaries or memory.",
+    "After both rule sources are verified, resolve the runner status-token mismatch so VERIFIED_INPUT is accepted consistently.",
+    "After both rule sources are verified, pin model/API configuration and verify a real API request and tool trace before pilot.",
+    "After both rule sources are verified, configure OPENAI_API_KEY only as an environment variable in the runner host; do not put it in chat, code, Git, or logs.",
+    "After both rule sources are verified, run from a clone/worktree with authenticated Git push and fetch/readback access to the existing origin/main."
   ],
   "formal_experiment_started": false,
-  "reason": "Rule sources are not available, so even a pilot cannot be a valid OLD vs NEW22 comparison."
+  "reason": "OLD source remains MISSING_INPUT, and the runner does not currently recognize the requested VERIFIED_INPUT status for NEW22. No valid OLD vs NEW22 pilot or formal experiment may run."
 }
