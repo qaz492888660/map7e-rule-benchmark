@@ -50,7 +50,9 @@
     "empty_resume": "PASS_NO_MODEL_REQUEST",
     "deduplication_guard": "PASS_TEMPORARY_TEST_ONLY",
     "dependency_lock_and_install": "PASS_PYYAML_6_0_3",
-    "work_sandbox_model_calls": "0"
+    "work_sandbox_model_calls": "0",
+    "github_readback": "PASS_FOR_RUNTIME_COMMIT_b88497443f23e246d847a38ec53280562066e351",
+    "verified_remote_commit_sha": "b88497443f23e246d847a38ec53280562066e351"
   },
   "runtime_configuration": {
     "status": "FROZEN",
@@ -78,7 +80,7 @@
   },
   "execution_trace": {
     "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
-    "evidence": "API smoke records the forced function-call response; benchmark runner records API responses, hosted web_search events, function calls/results, errors, and timestamps. No live API trace has been obtained."
+    "evidence": "API smoke records the real forced function_call response and appends the deterministic local diagnostic result; benchmark runner records API responses, hosted web_search events, function calls/results, errors, and timestamps. No live API trace has been obtained."
   },
   "persistence": {
     "method": "git_https",

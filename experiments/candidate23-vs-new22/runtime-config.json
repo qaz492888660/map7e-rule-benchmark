@@ -319,7 +319,7 @@
   },
   "execution_trace_capture": {
     "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
-    "api_smoke_method": "One forced function_call response; preserve response id/model/status/usage/output/tool-call metadata and timestamps.",
+    "api_smoke_method": "One forced diagnostic function_call in one real request; record response metadata and append its deterministic local tool result to trace without a second request.",
     "pilot_method": "Preserve full Responses API request/response items, function calls/results, hosted web_search items, errors, and timestamps in each raw run."
   },
   "runtime_modes": {

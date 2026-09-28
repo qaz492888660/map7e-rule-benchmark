@@ -181,7 +181,8 @@ def parse_workflow() -> dict[str, Any]:
     if len(jobs) != 1:
         raise ValueError("One serialized job is required to keep all modes on one controlled runner")
     job = next(iter(jobs.values()))
-    if job.get("runs-on") != "ubuntu-24.04":
+    runtime = load_json(RUNTIME_CONFIG)
+    if job.get("runs-on") != runtime["execution_environment"]["runner_label"]:
         raise ValueError("Workflow runner label differs from the frozen runtime configuration")
     steps = job.get("steps", [])
     checkout_steps = [step for step in steps if step.get("uses", "").startswith("actions/checkout@")]
@@ -198,7 +199,6 @@ def parse_workflow() -> dict[str, Any]:
     python_steps = [step for step in steps if step.get("uses", "").startswith("actions/setup-python@")]
     if len(python_steps) != 1:
         raise ValueError("Workflow must set up the pinned Python runtime")
-    runtime = load_json(RUNTIME_CONFIG)
     if python_steps[0].get("with", {}).get("python-version") != runtime["execution_environment"]["python_version"]:
         raise ValueError("actions/setup-python does not match the frozen Python patch version")
     install_steps = [step for step in steps if "pip install" in step.get("run", "")]
@@ -558,6 +558,27 @@ def run_api_smoke() -> dict[str, Any]:
     http_status, response, error = api_post(payload, key, int(runtime["request"]["timeout_seconds"]))
     finished = now()
     calls = [item for item in (response or {}).get("output", []) if item.get("type") == "function_call"]
+    tool_results: list[dict[str, Any]] = []
+    trace_errors: list[dict[str, Any]] = []
+    function_call_valid = False
+    trace = [{"kind": "api_response_output_item", "item": item} for item in (response or {}).get("output", [])]
+    if len(calls) == 1:
+        call = calls[0]
+        call_id = call.get("call_id") or call.get("id")
+        try:
+            arguments = json.loads(call.get("arguments", "{}"))
+        except (TypeError, json.JSONDecodeError) as exc:
+            arguments = {}
+            trace_errors.append({"stage": "smoke_tool_arguments", "error": redact_text(exc)})
+        if call.get("name") == "benchmark_runtime_trace" and call_id and arguments == {"value": "smoke-ok"}:
+            tool_result = {"ok": True, "received_value": arguments["value"]}
+            tool_results.append({"tool_name": call["name"], "call_id": call_id, "result": tool_result})
+            trace.append({"kind": "function_tool_result", "round": 1, "tool_name": call["name"], "call_id": call_id, "arguments": arguments, "result": tool_result})
+            function_call_valid = True
+        else:
+            trace_errors.append({"stage": "smoke_tool_result", "error": "Expected the forced diagnostic function call with an id and the fixed smoke argument."})
+    elif response is not None:
+        trace_errors.append({"stage": "smoke_tool_result", "error": "Expected exactly one diagnostic function_call in the API response."})
     record = {
         "smoke_type": "NON_EXPERIMENTAL_API_SMOKE",
         "smoke_id": "API-SMOKE-" + uuid.uuid4().hex,
@@ -576,11 +597,11 @@ def run_api_smoke() -> dict[str, Any]:
         "usage": (response or {}).get("usage"),
         "assistant_output": extract_text(response or {}),
         "tool_calls": calls,
-        "tool_results": [],
+        "tool_results": tool_results,
         "tool_call_metadata": [{"id": c.get("id"), "call_id": c.get("call_id"), "name": c.get("name"), "arguments": c.get("arguments")} for c in calls],
         "response_metadata": {k: (response or {}).get(k) for k in ("object", "created_at", "completed_at", "incomplete_details", "error", "metadata", "service_tier") if k in (response or {})},
-        "execution_trace": (response or {}).get("output", []),
-        "errors": [error] if error else [],
+        "execution_trace": trace,
+        "errors": ([error] if error else []) + trace_errors,
         "started_at": started,
         "finished_at": finished,
         "credential_saved": False,
@@ -592,7 +613,9 @@ def run_api_smoke() -> dict[str, Any]:
         and response.get("model") == model
         and bool(response.get("id"))
         and len(calls) == 1
-        and calls[0].get("name") == "benchmark_runtime_trace"
+        and function_call_valid
+        and bool(tool_results)
+        and tool_results[0]["result"].get("ok") is True
     )
     record["smoke_status"] = "PASS" if result_status else "FAIL"
     record["model_not_found_or_access_denied"] = bool(error and error.get("code") in {"model_not_found", "access_denied", "permission_denied"})
@@ -633,7 +656,7 @@ def run_api_smoke() -> dict[str, Any]:
     runtime["execution_trace_capture"] = {
         "status": "VERIFIED",
         "evidence_record": relative_record,
-        "evidence": "The real Responses API smoke response included the forced function_call item, id/call_id, name, arguments, response id, status, usage, and timestamps.",
+        "evidence": "The real Responses API smoke response included the forced function_call item with id/call_id, name, arguments, response id, status, usage, and timestamps; the isolated local diagnostic result was appended to execution_trace without a second model request.",
     }
     readiness["api_smoke"] = {"status": "PASS", "request_count": 1, "record": relative_record, "record_commit": commit_record, "response_id": record["response_id"], "actual_model_id": record["actual_model_id"]}
     readiness["execution_trace"]["status"] = "VERIFIED_BY_API_SMOKE"
