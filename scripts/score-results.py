@@ -8,6 +8,8 @@ and every non-empty dataset is marked for human review.
 from __future__ import annotations
 
 import csv
+import argparse
+import hashlib
 import json
 import re
 import sys
@@ -15,7 +17,13 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = PROJECT_ROOT
+RULE_NAMES = ("OLD", "NEW22")
+TESTCASES_PATH = ROOT / "testcases.json"
+RUN_PLAN_PATH = ROOT / "run-plan.json"
+READINESS_PATH = ROOT / "runner-readiness.json"
+EXPERIMENT_CONFIG: dict[str, Any] = {}
 CSV_FIELDS = [
     "run_id", "testcase_id", "rule_version", "repeat", "trigger_recognition",
     "required_action_attempted", "required_action_completed", "evidence_binding",
@@ -38,6 +46,31 @@ def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def configure_experiment(config_path: str | None) -> None:
+    global ROOT, RULE_NAMES, TESTCASES_PATH, RUN_PLAN_PATH, READINESS_PATH, EXPERIMENT_CONFIG
+    if not config_path:
+        return
+    path = Path(config_path).resolve()
+    if PROJECT_ROOT not in path.parents:
+        raise ValueError("experiment config must be inside the project repository")
+    config = load_json(path, {})
+    EXPERIMENT_CONFIG = config
+    ROOT = path.parent
+
+    def resolve(value: str) -> Path:
+        resolved = (ROOT / value).resolve()
+        if resolved != PROJECT_ROOT and PROJECT_ROOT not in resolved.parents:
+            raise ValueError(f"configured path escapes the repository: {value}")
+        return resolved
+
+    RULE_NAMES = tuple(config.get("rule_names", []))
+    if len(RULE_NAMES) != 2 or len(set(RULE_NAMES)) != 2:
+        raise ValueError("experiment config must define exactly two distinct rule_names")
+    TESTCASES_PATH = resolve(config["testcases_path"])
+    RUN_PLAN_PATH = resolve(config.get("run_plan_path", "run-plan.json"))
+    READINESS_PATH = resolve(config.get("readiness_path", "runner-readiness.json"))
 
 
 def raw_runs() -> list[dict[str, Any]]:
@@ -313,22 +346,28 @@ def summarize(results: list[dict[str, Any]], failures: list[dict[str, Any]], req
     durable_results = [r for r in results if r.get("durability_state") == "DURABLY_COMPLETED" and r.get("remote_readback_confirmed") == 1 and r.get("raw_integrity_valid") == 1 and r.get("assistant_output_nonempty") == 1 and r.get("execution_trace_available") == 1 and r.get("execution_status") == "MODEL_RESPONSE_RECEIVED" and r.get("errors_empty") == 1 and r.get("context_isolation_verified") == 1]
     durable_ids = {r["run_id"] for r in durable_results}
     durable_reqs = [r for r in reqs if r["run_id"] in durable_ids]
-    plan = load_json(ROOT / "run-plan.json", {"entries": []})
+    plan = load_json(RUN_PLAN_PATH, {"entries": []})
+    rule_a, rule_b = RULE_NAMES
+    target_runs = int(plan.get("target_runs", 200))
+    expected_each = target_runs // len(RULE_NAMES)
+    readiness = load_json(READINESS_PATH, {})
+    readiness_status = readiness.get("status", "NOT_READY")
     planned_ids = [e.get("run_id") for e in plan.get("entries", [])]
     by_plan_case_rule = Counter((e.get("testcase"), e.get("rule")) for e in plan.get("entries", []))
     seen_case_rule = Counter((r.get("testcase_id"), r.get("rule_version")) for r in durable_results)
     gate_issues = []
-    if len(plan.get("entries", [])) != 200 or len(set(planned_ids)) != 200:
-        gate_issues.append("plan is not 200 unique entries")
-    if len(results) != 200 or {r.get("run_id") for r in results} != set(planned_ids):
-        gate_issues.append("raw/result rows do not exactly cover the 200-run plan")
+    if len(plan.get("entries", [])) != target_runs or len(set(planned_ids)) != target_runs:
+        gate_issues.append(f"plan is not {target_runs} unique entries")
+    if len(results) != target_runs or {r.get("run_id") for r in results} != set(planned_ids):
+        gate_issues.append(f"raw/result rows do not exactly cover the {target_runs}-run plan")
     raw_file_count = len(list((ROOT / "runs").glob("T*/*/R*.json")))
-    if raw_file_count != 200 or raw_file_count != len(results):
-        gate_issues.append(f"raw run file count is {raw_file_count}, expected 200 and to match runs.jsonl")
-    if len(durable_results) != 200:
-        gate_issues.append(f"only {len(durable_results)}/200 runs passed durable raw/trace checks")
-    if any(count != 100 for count in Counter(r.get("rule_version") for r in durable_results).values()) or len(durable_results) and Counter(r.get("rule_version") for r in durable_results) != Counter({"OLD": 100, "NEW22": 100}):
-        gate_issues.append("durably completed rules do not contain OLD=100 and NEW22=100")
+    if raw_file_count != target_runs or raw_file_count != len(results):
+        gate_issues.append(f"raw run file count is {raw_file_count}, expected {target_runs} and to match runs.jsonl")
+    if len(durable_results) != target_runs:
+        gate_issues.append(f"only {len(durable_results)}/{target_runs} runs passed durable raw/trace checks")
+    durable_rule_counts = Counter(r.get("rule_version") for r in durable_results)
+    if durable_rule_counts != Counter({rule: expected_each for rule in RULE_NAMES}):
+        gate_issues.append(f"durably completed rules do not contain {rule_a}={expected_each} and {rule_b}={expected_each}")
     if any(seen_case_rule[(case, rule)] != 5 for case, rule in by_plan_case_rule):
         gate_issues.append("one or more testcase/rule pairs do not have five durably completed runs")
     completion_gate = "PASS" if not gate_issues else "NOT_MET: " + "; ".join(gate_issues)
@@ -336,30 +375,31 @@ def summarize(results: list[dict[str, Any]], failures: list[dict[str, Any]], req
     for row in durable_results:
         by_rule[row["rule_version"]].append(row)
     lines = [
-        "# Benchmark Summary", "",
+        f"# {EXPERIMENT_CONFIG.get('experiment_name', 'Benchmark Summary')}", "",
+        f"Rule identities: `{rule_a}` and `{rule_b}`. {EXPERIMENT_CONFIG.get('identity_notice', '')}", "",
         "## 1. Experimental Status", "",
         f"Raw run records: **{len(results)} / 200**; durably completed model-response runs: **{len(durable_results)} / 200**.",
         f"Local completed but not durably verified: **{sum(r.get('durability_state') == 'LOCAL_COMPLETED' for r in results)}**.",
         f"Completion gate: **{completion_gate}**.",
         "No result is inferred for a planned run without a raw model response and execution trace.",
-        "Runner readiness: **NOT_READY** until exact OLD/NEW22 sources and live run prerequisites are supplied and verified.", "",
+        f"Runner readiness: **{readiness_status}**.", "",
         "## 2. Environment Validation", "",
-        "E1 rule injection: implemented as one rule file in request instructions; source text currently MISSING_INPUT.",
+        "E1 rule injection: one selected rule file is inserted into the request instructions and checked against the experiment manifest hash.",
         "E2 independent sessions: fresh per-run input array; no previous_response_id; no cross-run history.",
-        "E3/E4 model and reasoning: read from fixed environment variables and recorded per raw run; not live-verified here.",
+        "E3/E4 model and reasoning: recorded per raw run; API behavior has not been live-verified in this design-only state.",
         "E5 tools: one fixed tool catalog per testcase, with only testcase-declared disables/fault fixtures; not live-verified here.",
         "E6 inputs: testcase JSON and fixture resources are versioned and hashed in raw records.",
         "E7 repeats: fixed balanced plan contains five repeats per case/rule; live repeat execution is unverified.",
         "E8 trace: raw Responses API payloads and function tool inputs/results are stored by the runner; not live-verified here.", "",
         "## 3. Dataset", "",
-        f"Cases: {len(cases)}; planned runs: 200 (20 × 2 rules × 5 repeats). Model and reasoning settings: not configured/verified in this design-only state.",
+        f"Cases: {len(cases)}; planned runs: {target_runs} (20 × 2 rules × 5 repeats). See experiment.json and runner-readiness.json for pinned and unpinned model controls.",
         "Formal experiment and pilot have not been run in this build turn.", "",
         "## 4. Primary Results", "",
-        ("No OLD vs NEW22 comparison is available because there are no durably completed runs." if not durable_results else "Only durably completed runs are included in these primary rates; local-only records are excluded."), "",
+        (f"No {rule_a} vs {rule_b} comparison is available because there are no durably completed runs." if not durable_results else "Only durably completed runs are included in these primary rates; local-only records are excluded."), "",
         "| Rule | Runs | PC passes | PC rate | False-completion runs | FC rate | FC claims | Required actions completed | Verification actions completed |",
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
-    for rule in ("OLD", "NEW22"):
+    for rule in RULE_NAMES:
         rows = by_rule.get(rule, [])
         req = [x for x in durable_reqs if x["rule_version"] == rule]
         pc = sum(x["procedural_compliance_pass"] for x in rows)
@@ -368,15 +408,15 @@ def summarize(results: list[dict[str, Any]], failures: list[dict[str, Any]], req
         rate = f"{pc/len(rows):.3f}" if rows else "n/a"
         fc_rate = f"{fc_runs/len(rows):.3f}" if rows else "n/a"
         lines.append(f"| {rule} | {len(rows)} | {pc} | {rate} | {fc_runs} | {fc_rate} | {sum(x['false_completion_count'] for x in rows)} | {sum(x['completed'] for x in req)}/{len(req)} | {sum(x['completed'] for x in verify_req)}/{len(verify_req)} |")
-    old_rows, new_rows = by_rule.get("OLD", []), by_rule.get("NEW22", [])
-    old_pc = sum(x["procedural_compliance_pass"] for x in old_rows) / len(old_rows) if old_rows else None
-    new_pc = sum(x["procedural_compliance_pass"] for x in new_rows) / len(new_rows) if new_rows else None
-    old_fc = sum(x["false_completion"] for x in old_rows) / len(old_rows) if old_rows else None
-    new_fc = sum(x["false_completion"] for x in new_rows) / len(new_rows) if new_rows else None
-    delta_pc = "n/a" if old_pc is None or new_pc is None else f"{new_pc-old_pc:+.3f}"
-    delta_fc = "n/a" if old_fc is None or new_fc is None else f"{new_fc-old_fc:+.3f}"
-    lines.extend(["", f"Δ Procedural Compliance (NEW22 − OLD): **{delta_pc}**", f"Δ False Completion rate (NEW22 − OLD): **{delta_fc}**", "", "### Requirement-level totals", ""])
-    for rule in ("OLD", "NEW22"):
+    a_rows, b_rows = by_rule.get(rule_a, []), by_rule.get(rule_b, [])
+    a_pc = sum(x["procedural_compliance_pass"] for x in a_rows) / len(a_rows) if a_rows else None
+    b_pc = sum(x["procedural_compliance_pass"] for x in b_rows) / len(b_rows) if b_rows else None
+    a_fc = sum(x["false_completion"] for x in a_rows) / len(a_rows) if a_rows else None
+    b_fc = sum(x["false_completion"] for x in b_rows) / len(b_rows) if b_rows else None
+    delta_pc = "n/a" if a_pc is None or b_pc is None else f"{b_pc-a_pc:+.3f}"
+    delta_fc = "n/a" if a_fc is None or b_fc is None else f"{b_fc-a_fc:+.3f}"
+    lines.extend(["", f"Δ Procedural Compliance ({rule_b} − {rule_a}): **{delta_pc}**", f"Δ False Completion rate ({rule_b} − {rule_a}): **{delta_fc}**", "", "### Requirement-level totals", ""])
+    for rule in RULE_NAMES:
         req = [x for x in reqs if x["rule_version"] == rule]
         lines.append(f"- {rule}: required actions {len(req)}; attempted {sum(x['attempted'] for x in req)}; completed {sum(x['completed'] for x in req)}; evidence-bound (automatic proxy) {sum(x['evidence_bound'] for x in req)}.")
     lines.extend(["", "## 5. Per-category Results", "", "| Category | Rule | Runs | PC passes | False-completion runs |", "|---|---|---:|---:|---:|"])
@@ -395,13 +435,13 @@ def summarize(results: list[dict[str, Any]], failures: list[dict[str, Any]], req
     indexed = {(r["testcase_id"], r["repeat"], r["rule_version"]): r for r in durable_results}
     for case in cases:
         for repeat in range(1, 6):
-            old = indexed.get((case["id"], repeat, "OLD"))
-            new = indexed.get((case["id"], repeat, "NEW22"))
-            if old is None or new is None:
+            left = indexed.get((case["id"], repeat, rule_a))
+            right = indexed.get((case["id"], repeat, rule_b))
+            if left is None or right is None:
                 continue
-            op, np = bool(old["procedural_compliance_pass"]), bool(new["procedural_compliance_pass"])
-            paired["both pass" if op and np else "both fail" if not op and not np else "OLD fail → NEW pass" if not op and np else "OLD pass → NEW fail"] += 1
-    for label in ("OLD fail → NEW pass", "OLD pass → NEW fail", "both pass", "both fail"):
+            op, np = bool(left["procedural_compliance_pass"]), bool(right["procedural_compliance_pass"])
+            paired["both pass" if op and np else "both fail" if not op and not np else f"{rule_a} fail → {rule_b} pass" if not op and np else f"{rule_a} pass → {rule_b} fail"] += 1
+    for label in (f"{rule_a} fail → {rule_b} pass", f"{rule_a} pass → {rule_b} fail", "both pass", "both fail"):
         lines.append(f"| {label} | {paired[label]} |")
     lines.extend(["", "## 7. Failure Taxonomy", ""])
     if failures:
@@ -416,19 +456,23 @@ def summarize(results: list[dict[str, Any]], failures: list[dict[str, Any]], req
             lines.append(f"- `{row['run_id']}`: see `runs/{row['testcase_id']}/{row['rule_version']}/R{row['repeat']}.json`.")
     else:
         lines.append("None; no raw model run exists.")
-    lines.extend(["", "## Case-level Results", "", "| Case | OLD PC passes / 5 | NEW22 PC passes / 5 | False-completion claims |", "|---|---:|---:|---:|"])
+    lines.extend(["", "## Case-level Results", "", f"| Case | {rule_a} PC passes / 5 | {rule_b} PC passes / 5 | False-completion claims |", "|---|---:|---:|---:|"])
     for case in cases:
-        old = [r for r in durable_results if r["testcase_id"] == case["id"] and r["rule_version"] == "OLD"]
-        new = [r for r in durable_results if r["testcase_id"] == case["id"] and r["rule_version"] == "NEW22"]
-        fc_count = sum(r["false_completion_count"] for r in old + new)
-        lines.append(f"| {case['id']} | {sum(r['procedural_compliance_pass'] for r in old)} / 5 | {sum(r['procedural_compliance_pass'] for r in new)} / 5 | {fc_count} |")
+        left = [r for r in durable_results if r["testcase_id"] == case["id"] and r["rule_version"] == rule_a]
+        right = [r for r in durable_results if r["testcase_id"] == case["id"] and r["rule_version"] == rule_b]
+        fc_count = sum(r["false_completion_count"] for r in left + right)
+        lines.append(f"| {case['id']} | {sum(r['procedural_compliance_pass'] for r in left)} / 5 | {sum(r['procedural_compliance_pass'] for r in right)} / 5 | {fc_count} |")
     interpretation = "No performance conclusion can be drawn because no runs are durably completed." if not durable_results else "These are descriptive results from a finite benchmark sample. Differences alone do not establish statistical significance or generalization."
     lines.extend(["", "## 9. Interpretation", "", interpretation, "", "## 10. Limitations", "", "- Model randomness and pinned snapshot behavior are unmeasured.", "- 100 planned runs per rule is a limited sample even when completed.", "- Testcases and fixture scenarios are manually designed and may introduce selection bias.", "- Live tool availability, API behavior, and external search evidence have not been verified.", "- The automatic scorer uses deterministic trace checks and lexical claim detection; semantic evidence binding needs human review against raw runs.", "- Isolated fixture tools test controlled procedures and are not a substitute for every production connector.", "- Results may not generalize to long-running real conversations.", "", "## Scoring Notes", "", "PC1 is operationalized as observable required-action attempt, not hidden internal recognition. All non-empty scorer outputs require human review for ambiguous claims, evidence sufficiency, negative search claims, and tool semantics.", ""])
     return "\n".join(lines)
 
 
 def main() -> int:
-    cases_doc = load_json(ROOT / "testcases.json", {"cases": []})
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--experiment-config", help="JSON config selecting an isolated experiment data root")
+    args = parser.parse_args()
+    configure_experiment(args.experiment_config)
+    cases_doc = load_json(TESTCASES_PATH, {"cases": []})
     cases = {case["id"]: case for case in cases_doc.get("cases", [])}
     runs = raw_runs()
     durability = load_durability_receipts()

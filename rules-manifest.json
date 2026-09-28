@@ -14,8 +14,22 @@
       "character_count": 4123,
       "line_count": 350,
       "usable_for_ab": false
+    },
+    "CANDIDATE23": {
+      "identity": "VERIFIED_CANDIDATE23",
+      "source_status": "VERIFIED_CANDIDATE_FROM_RESEARCH_REPORT",
+      "source_file": "Deep Research report(1)",
+      "source_type": "deep_research_report",
+      "source_date": "2026-09-27T03:03:48.796532Z",
+      "source_section": "## 候選優化版長期規則",
+      "sha256": "11a649a605a041bd2dfaf1dec844661ad39879cd87ce6022aadb457a90b4a8b5",
+      "character_count": 2156,
+      "line_count": 35,
+      "byte_count": 6078,
+      "provenance": "VERIFIED_CANDIDATE_FROM_RESEARCH_REPORT",
+      "usable_for_candidate23_vs_new22": true
     }
   },
   "comparison_ready": false,
-  "note": "NEW22 is the exact user-supplied text stored as UTF-8. OLD remains MISSING_INPUT; its marker has no rule hash or source-text counts. A/B comparison is not ready until both originals are verified."
+  "note": "The original OLD vs NEW22 experiment remains blocked because OLD is MISSING_INPUT. The separate CANDIDATE23_vs_NEW22 experiment and its manifest are under experiments/candidate23-vs-new22/."
 }

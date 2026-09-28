@@ -15,6 +15,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import platform
 import re
 import random
 import shutil
@@ -27,7 +28,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = PROJECT_ROOT  # Per-experiment data root; overridden by --experiment-config.
 RUNS = ROOT / "runs"
 API_URL = "https://api.openai.com/v1/responses"
 BASELINE = (
@@ -36,6 +38,14 @@ BASELINE = (
     "action or verification unless the execution record supports it."
 )
 RULE_NAMES = ("OLD", "NEW22")
+RUN_ID_CODES = {"OLD": "OLD", "NEW22": "NEW22"}
+RULE_PATHS = {name: ROOT / "rules" / f"{name}.md" for name in RULE_NAMES}
+TESTCASES_PATH = ROOT / "testcases.json"
+RUN_PLAN_PATH = ROOT / "run-plan.json"
+RULES_MANIFEST_PATH = ROOT / "rules-manifest.json"
+FIXTURES_ROOT = ROOT / "fixtures"
+EXPERIMENT_CONFIG: dict[str, Any] = {}
+ACCEPTED_RULE_STATUSES = {"ORIGINAL_VERBATIM", "VERIFIED_INPUT", "VERIFIED_CANDIDATE_FROM_RESEARCH_REPORT"}
 MAX_TOOL_ROUNDS = 8
 MAX_TOOL_OUTPUT_CHARS = 30000
 
@@ -105,16 +115,59 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def configure_experiment(config_path: str | None) -> None:
+    """Select an isolated experiment data root while sharing versioned project fixtures."""
+    global ROOT, RUNS, RULE_NAMES, RUN_ID_CODES, RULE_PATHS
+    global TESTCASES_PATH, RUN_PLAN_PATH, RULES_MANIFEST_PATH, FIXTURES_ROOT, EXPERIMENT_CONFIG
+    if not config_path:
+        return
+    path = Path(config_path).resolve()
+    if PROJECT_ROOT not in path.parents:
+        raise ValueError("experiment config must be inside the project repository")
+    config = read_json(path)
+    root = path.parent
+
+    def resolve(value: str) -> Path:
+        resolved = (root / value).resolve()
+        if resolved != PROJECT_ROOT and PROJECT_ROOT not in resolved.parents:
+            raise ValueError(f"configured path escapes the repository: {value}")
+        return resolved
+
+    names = tuple(config.get("rule_names", []))
+    if len(names) != 2 or len(set(names)) != 2:
+        raise ValueError("experiment config must define exactly two distinct rule_names")
+    code_map = config.get("run_id_codes", {})
+    if set(code_map) != set(names) or any(not isinstance(value, str) or not value for value in code_map.values()):
+        raise ValueError("experiment config run_id_codes must map each rule to a non-empty code")
+    rule_files = config.get("rule_files", {})
+    if set(rule_files) != set(names):
+        raise ValueError("experiment config rule_files must map both rule_names")
+    ROOT = root
+    RUNS = ROOT / config.get("runs_dir", "runs")
+    RULE_NAMES = names
+    RUN_ID_CODES = dict(code_map)
+    RULE_PATHS = {name: resolve(rule_files[name]) for name in names}
+    TESTCASES_PATH = resolve(config["testcases_path"])
+    RUN_PLAN_PATH = resolve(config.get("run_plan_path", "run-plan.json"))
+    RULES_MANIFEST_PATH = resolve(config.get("rules_manifest_path", "rules-manifest.json"))
+    FIXTURES_ROOT = resolve(config.get("fixtures_root", "../../fixtures"))
+    EXPERIMENT_CONFIG = config
+
+
+def repo_relative(path: Path) -> str:
+    return path.resolve().relative_to(PROJECT_ROOT).as_posix()
+
+
 def load_case_data() -> tuple[dict[str, Any], dict[str, Any]]:
-    return read_json(ROOT / "testcases.json"), read_json(ROOT / "run-plan.json")
+    return read_json(TESTCASES_PATH), read_json(RUN_PLAN_PATH)
 
 
 def rule_info(rule: str) -> tuple[bytes, str, dict[str, Any]]:
     if rule not in RULE_NAMES:
         raise ValueError(f"Unknown rule version: {rule}")
-    path = ROOT / "rules" / f"{rule}.md"
+    path = RULE_PATHS[rule]
     raw = path.read_bytes()
-    manifest = read_json(ROOT / "rules-manifest.json")["rules"][rule]
+    manifest = read_json(RULES_MANIFEST_PATH)["rules"][rule]
     actual_hash = sha256(raw)
     if actual_hash != manifest.get("sha256"):
         raise ValueError(f"Rule hash does not match rules-manifest.json for {rule}")
@@ -136,7 +189,7 @@ def validate_layout() -> dict[str, Any]:
         errors.append("run-plan.json must contain exactly 200 entries")
     if len(set(run_ids)) != len(run_ids):
         errors.append("run_id values are not unique")
-    expected = {f"{cid}-{rule}-R{repeat}" for cid in case_ids for rule in RULE_NAMES for repeat in range(1, 6)}
+    expected = {f"{cid}-{RUN_ID_CODES[rule]}-R{repeat}" for cid in case_ids for rule in RULE_NAMES for repeat in range(1, 6)}
     if set(run_ids) != expected:
         errors.append("run-plan does not match 20 cases x 2 rules x 5 repeats")
     counts: dict[tuple[str, str], int] = {}
@@ -149,16 +202,22 @@ def validate_layout() -> dict[str, Any]:
         errors.append("one or more cases are missing required oracle fields")
     hashes: dict[str, str] = {}
     complete: dict[str, bool] = {}
+    usable: dict[str, bool] = {}
     for rule in RULE_NAMES:
         try:
             raw, digest, manifest = rule_info(rule)
             hashes[rule] = digest
-            complete[rule] = manifest.get("source_status") == "ORIGINAL_VERBATIM" and not raw.decode("utf-8", errors="replace").startswith("MISSING_INPUT")
+            complete[rule] = manifest.get("source_status") in ACCEPTED_RULE_STATUSES and not raw.decode("utf-8", errors="replace").startswith("MISSING_INPUT")
+            usable[rule] = manifest.get("usable_for_ab") is True
         except (OSError, ValueError, KeyError) as exc:
             errors.append(f"rule file/manifest invalid for {rule}: {exc}")
             complete[rule] = False
-    if hashes.get("OLD") == hashes.get("NEW22"):
-        errors.append("OLD and NEW22 hashes must differ")
+            usable[rule] = False
+    if len(hashes) == 2 and len(set(hashes.values())) != 2:
+        errors.append("the two experiment rule hashes must differ")
+    fixed_parameters = EXPERIMENT_CONFIG.get("model_parameters", {})
+    model_parameters_pinned = bool(fixed_parameters.get("model_id") and fixed_parameters.get("reasoning_effort")) if EXPERIMENT_CONFIG else True
+    api_credential_available = bool(os.environ.get("OPENAI_API_KEY"))
     return {
         "valid_structure": not errors,
         "errors": errors,
@@ -167,7 +226,10 @@ def validate_layout() -> dict[str, Any]:
         "unique_run_ids": len(set(run_ids)),
         "rule_hashes": hashes,
         "rules_complete": complete,
-        "ready_for_model_request": not errors and all(complete.values()),
+        "rules_usable_for_selected_experiment": usable,
+        "model_parameters_pinned": model_parameters_pinned,
+        "api_credential_available": api_credential_available,
+        "ready_for_model_request": not errors and all(complete.values()) and all(usable.values()) and model_parameters_pinned and api_credential_available,
     }
 
 
@@ -338,7 +400,7 @@ def tool_permissions_for(case: dict[str, Any]) -> list[str]:
 
 
 def copy_workspace(case_id: str, run_id: str) -> Path:
-    src = ROOT / "fixtures" / "workspaces" / case_id
+    src = FIXTURES_ROOT / "workspaces" / case_id
     dst = RUNS / ".work" / run_id
     if dst.exists():
         raise FileExistsError(f"Run workspace already exists; refusing reuse: {dst}")
@@ -355,7 +417,7 @@ def attachment_path(case_id: str, raw_path: str, workspace: Path) -> Path:
     if raw_path.startswith(marker):
         return safe_child(workspace, raw_path[len(marker):])
     if raw_path.startswith("fixtures/images/"):
-        return ROOT / raw_path
+        return FIXTURES_ROOT / raw_path[len("fixtures/"):]
     return safe_child(workspace, raw_path)
 
 
@@ -439,7 +501,7 @@ def git(args: list[str], timeout: int = 45) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.pop("OPENAI_API_KEY", None)
     env["GIT_TERMINAL_PROMPT"] = "0"
-    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, timeout=timeout, env=env)
+    return subprocess.run(["git", *args], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=timeout, env=env)
 
 
 def ensure_main_worktree() -> None:
@@ -519,7 +581,7 @@ def event_states(run_id: str) -> list[dict[str, Any]]:
 def persist_event(run_id: str, event: dict[str, Any]) -> None:
     path = ROOT / "run-reservations.jsonl"
     line = append_event(event)
-    rel = str(path.relative_to(ROOT))
+    rel = repo_relative(path)
     commit_push([rel], f"benchmark run {run_id}: {event['state']}")
     verify_remote_file(rel, path.read_bytes())
 
@@ -527,9 +589,9 @@ def persist_event(run_id: str, event: dict[str, Any]) -> None:
 def record_receipt(entry: dict[str, Any], receipt: dict[str, Any]) -> None:
     existing = event_states(entry["run_id"])
     if any(e.get("state") == receipt["state"] and e.get("raw_sha256") == receipt.get("raw_sha256") for e in existing):
-        rel = "run-reservations.jsonl"
+        rel = repo_relative(ROOT / "run-reservations.jsonl")
         commit_push([rel], f"benchmark run {entry['run_id']}: resume receipt persistence")
-        verify_remote_file(rel, (ROOT / rel).read_bytes())
+        verify_remote_file(rel, (PROJECT_ROOT / rel).read_bytes())
         return
     persist_event(entry["run_id"], receipt)
 
@@ -587,13 +649,15 @@ def prepare_reservation(entry: dict[str, Any], request_sha: str, model: str, rea
 def persist_raw(entry: dict[str, Any], raw_path: Path, raw: bytes, record: dict[str, Any]) -> tuple[str, bool, str]:
     rel_raw = str(raw_path.relative_to(ROOT))
     index = ROOT / "runs.jsonl"
+    repo_raw = repo_relative(raw_path)
+    repo_index = repo_relative(index)
     record["raw_path"] = rel_raw
     record["raw_sha256"] = sha256(raw)
     append_runs_index(record)
     try:
-        commit_sha = commit_push([rel_raw, str(index.relative_to(ROOT))], f"benchmark run {entry['run_id']}: raw result")
-        remote_raw_sha = verify_remote_file(rel_raw, raw)
-        verify_remote_file(str(index.relative_to(ROOT)), index.read_bytes())
+        commit_sha = commit_push([repo_raw, repo_index], f"benchmark run {entry['run_id']}: raw result")
+        remote_raw_sha = verify_remote_file(repo_raw, raw)
+        verify_remote_file(repo_index, index.read_bytes())
     except Exception as exc:
         record["durability_state"] = "LOCAL_COMPLETED" if record["execution_status"] == "MODEL_RESPONSE_RECEIVED" else "LOCAL_FAILED_ATTEMPT"
         record["durability_error"] = str(exc)
@@ -712,8 +776,11 @@ def execute_entry(entry: dict[str, Any], case: dict[str, Any], dry_run: bool) ->
     if dry_run:
         return {"run_id": entry["run_id"], "dry_run": True, "model_request_made": False, "rule_hash": rule_hash, "case_id": case["id"], "input": case["input"], "tools": sorted(tool_names_for(case))}
     api_key = os.environ.get("OPENAI_API_KEY", "")
-    model = os.environ.get("BENCHMARK_MODEL_ID", "")
-    reasoning = os.environ.get("BENCHMARK_REASONING_EFFORT", "")
+    fixed = EXPERIMENT_CONFIG.get("model_parameters", {})
+    model = str(fixed.get("model_id") or os.environ.get("BENCHMARK_MODEL_ID", ""))
+    reasoning = str(fixed.get("reasoning_effort") or os.environ.get("BENCHMARK_REASONING_EFFORT", ""))
+    if EXPERIMENT_CONFIG and (not fixed.get("model_id") or not fixed.get("reasoning_effort")):
+        raise RuntimeError("experiment config must pin model_id and reasoning_effort before any model request")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is required via environment variable; no key is stored in files")
     if not model:
@@ -721,9 +788,9 @@ def execute_entry(entry: dict[str, Any], case: dict[str, Any], dry_run: bool) ->
     if not reasoning:
         raise RuntimeError("BENCHMARK_REASONING_EFFORT must be fixed via environment variable")
     try:
-        temperature = float(os.environ.get("BENCHMARK_TEMPERATURE", "0.2"))
-        max_tokens = int(os.environ.get("BENCHMARK_MAX_OUTPUT_TOKENS", "2000"))
-        timeout = int(os.environ.get("BENCHMARK_REQUEST_TIMEOUT", "120"))
+        temperature = float(fixed.get("temperature", os.environ.get("BENCHMARK_TEMPERATURE", "0.2")))
+        max_tokens = int(fixed.get("max_output_tokens", os.environ.get("BENCHMARK_MAX_OUTPUT_TOKENS", "2000")))
+        timeout = int(fixed.get("request_timeout_seconds", os.environ.get("BENCHMARK_REQUEST_TIMEOUT", "120")))
     except ValueError as exc:
         raise RuntimeError(f"Invalid fixed model parameter in environment: {exc}") from exc
     if not 0 <= temperature <= 2 or max_tokens < 1 or timeout < 1:
@@ -753,6 +820,7 @@ def execute_entry(entry: dict[str, Any], case: dict[str, Any], dry_run: bool) ->
         "model": actual_model, "model_requested": model, "reasoning_setting": reasoning,
         "model_parameters": {"temperature": temperature, "max_output_tokens": max_tokens, "request_timeout_seconds": timeout, "store": False, "previous_response_id": None},
         "tool_permissions": tool_permissions_for(case), "tool_policy": case.get("tool_policy", {}),
+        "execution_environment": {"python_version": sys.version, "platform": platform.platform(), "runner_sha256": sha256(Path(__file__).read_bytes())},
         "testcase_sha256": sha256(json_bytes(case)), "input": case["input"], "input_payload": user_input,
         "attachments": attachment_records, "initial_workspace_snapshot": initial_workspace_snapshot,
         "final_workspace_snapshot": snapshot_workspace(workspace),
@@ -776,6 +844,8 @@ def persist_existing(entry: dict[str, Any]) -> dict[str, Any]:
         return {"run_id": entry["run_id"], "status": "NO_LOCAL_RAW"}
     raw = path.read_bytes()
     index_path = ROOT / "runs.jsonl"
+    repo_raw = repo_relative(path)
+    repo_index = repo_relative(index_path)
     indexed = index_path.exists() and any(json.loads(x).get("run_id") == entry["run_id"] for x in index_path.read_text(encoding="utf-8").splitlines() if x.strip())
     if not indexed:
         record = read_json(path)
@@ -783,9 +853,9 @@ def persist_existing(entry: dict[str, Any]) -> dict[str, Any]:
         record["raw_sha256"] = sha256(raw)
         append_runs_index(record)
     try:
-        head = commit_push([str(path.relative_to(ROOT)), "runs.jsonl"], f"benchmark run {entry['run_id']}: resume persistence")
-        remote_head = verify_remote_file(str(path.relative_to(ROOT)), raw)
-        verify_remote_file("runs.jsonl", index_path.read_bytes())
+        head = commit_push([repo_raw, repo_index], f"benchmark run {entry['run_id']}: resume persistence")
+        remote_head = verify_remote_file(repo_raw, raw)
+        verify_remote_file(repo_index, index_path.read_bytes())
         record = read_json(path)
         receipt = {"run_id": entry["run_id"], "state": "DURABLY_COMPLETED" if record.get("execution_status") == "MODEL_RESPONSE_RECEIVED" else "DURABLY_RECORDED_FAILED_ATTEMPT", "raw_sha256": sha256(raw), "raw_commit_sha": head, "remote_main_sha_after_readback": remote_head, "remote_readback_at": utc_now()}
         receipt_error = None
@@ -804,14 +874,18 @@ def persist_existing(entry: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--experiment-config", help="JSON config selecting an isolated experiment data root")
     parser.add_argument("--testcase", help="Case id, e.g. T01")
-    parser.add_argument("--rule", choices=RULE_NAMES)
+    parser.add_argument("--rule", help="Rule label from the selected experiment config")
     parser.add_argument("--repeat", type=int)
     parser.add_argument("--all", action="store_true", help="Run the fixed plan (not recommended until pilot approval)")
     parser.add_argument("--dry-run", action="store_true", help="Validate selection and print plan; never call a model")
     parser.add_argument("--resume", action="store_true", help="Persist existing local raw runs first; never re-call an existing run_id")
     args = parser.parse_args()
     try:
+        configure_experiment(args.experiment_config)
+        if args.rule and args.rule not in RULE_NAMES:
+            raise ValueError(f"Unknown rule {args.rule}; choose from: {', '.join(RULE_NAMES)}")
         report = validate_layout()
         if not report["valid_structure"]:
             raise RuntimeError("Integrity validation failed: " + "; ".join(report["errors"]))

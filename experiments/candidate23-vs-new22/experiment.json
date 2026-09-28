@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "experiment_id": "CANDIDATE23_vs_NEW22",
+  "experiment_name": "CANDIDATE23_vs_NEW22",
+  "identity_notice": "CANDIDATE23 is VERIFIED_CANDIDATE23 extracted from a research report. It is not the historical OLD baseline and must never be labeled as OLD.",
+  "rule_names": [
+    "CANDIDATE23",
+    "NEW22"
+  ],
+  "run_id_codes": {
+    "CANDIDATE23": "C23",
+    "NEW22": "N22"
+  },
+  "rule_files": {
+    "CANDIDATE23": "../../rules/CANDIDATE23.md",
+    "NEW22": "../../rules/NEW22.md"
+  },
+  "rules_manifest_path": "rules-manifest.json",
+  "testcases_path": "../../testcases.json",
+  "run_plan_path": "run-plan.json",
+  "fixtures_root": "../../fixtures",
+  "runs_dir": "runs",
+  "readiness_path": "runner-readiness.json",
+  "scorer_path": "../../scripts/score-results.py",
+  "model_parameters": {
+    "model_id": null,
+    "reasoning_effort": null,
+    "temperature": 0.2,
+    "max_output_tokens": 2000,
+    "request_timeout_seconds": 120,
+    "store": false,
+    "previous_response_id": null
+  },
+  "controls": {
+    "only_rule_text_varies": true,
+    "testcase_source": "../../testcases.json (shared byte-identical source)",
+    "fixtures_source": "../../fixtures (shared immutable source)",
+    "tool_permissions": "Derived from the same testcase tool_policy and runner tool catalog for both rules.",
+    "execution_environment": "Runner code hash, Python version, and platform will be recorded per run; host/runtime is not pinned across future execution sessions.",
+    "scorer_source": "../../scripts/score-results.py",
+    "formal_runs_started": false,
+    "pilot_started": false
+  }
+}

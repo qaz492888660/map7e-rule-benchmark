@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "experiment_id": "CANDIDATE23_vs_NEW22",
+  "status": "NOT_READY",
+  "formal_runs_completed": 0,
+  "pilot_runs_completed": 0,
+  "model_calls_made_during_build": false,
+  "controls": {
+    "only_rule_text_varies": true,
+    "model_id": "NOT_PINNED",
+    "reasoning_effort": "NOT_PINNED",
+    "temperature": 0.2,
+    "max_output_tokens": 2000,
+    "tool_permissions": "Same testcase-specific tool policy and runner catalog for both rules.",
+    "testcases": "Shared source ../../testcases.json.",
+    "fixtures": "Shared source ../../fixtures/.",
+    "execution_environment": "Runtime is recorded per raw run, but the host/Python environment is not pinned across future sessions.",
+    "scorer": "Shared scorer implementation; experiment-specific paths and labels are supported."
+  },
+  "verified_static_inputs": {
+    "CANDIDATE23": "VERIFIED_CANDIDATE23",
+    "NEW22": "VERIFIED_INPUT",
+    "rule_hashes_different": true,
+    "testcase_count": 20,
+    "planned_runs": 200,
+    "testcases_and_fixtures_shared_without_modification": true
+  },
+  "validation_results": {
+    "python_syntax": "PASS",
+    "json_parsing": "PASS",
+    "candidate23_source_extraction_byte_match": "PASS",
+    "rule_hashes_and_counts": "PASS",
+    "testcase_oracle_count": "PASS",
+    "run_plan_count_uniqueness_balance_and_noncollision": "PASS",
+    "candidate23_dry_run": "PASS_NO_MODEL_REQUEST",
+    "new22_dry_run": "PASS_NO_MODEL_REQUEST",
+    "empty_runs_scorer": "PASS_ZERO_ROWS",
+    "empty_resume": "PASS_NO_MODEL_REQUEST",
+    "deduplication_guards": "PASS_TEMPORARY_TEST_ONLY",
+    "secret_scan": "PASS_NO_MATCHES",
+    "github_readback": "PENDING",
+    "formal_runs": "0/200",
+    "pilot_runs": 0,
+    "model_calls_during_build": 0
+  },
+  "blockers": [
+    {
+      "item": "Pinned model snapshot",
+      "status": "NOT_CONFIGURED",
+      "evidence": "experiment.json model_parameters.model_id is null; select and pin one model ID before any model request."
+    },
+    {
+      "item": "Pinned reasoning effort",
+      "status": "NOT_CONFIGURED",
+      "evidence": "experiment.json model_parameters.reasoning_effort is null; choose one setting and hold it constant for both rules and all repeats."
+    },
+    {
+      "item": "Execution environment pinning",
+      "status": "PARTIAL",
+      "evidence": "The runner records Python version, platform, and its own source hash per raw run, but no execution image/runtime lock is defined."
+    },
+    {
+      "item": "Live durable persistence verification",
+      "status": "NOT_LIVE_VERIFIED",
+      "evidence": "The runner commits, pushes, and reads back raw run/index files from origin/main; this experiment-specific path has only been statically checked and not exercised with a run."
+    },
+    {
+      "item": "Pilot API credential",
+      "status": "NOT_PROVIDED",
+      "evidence": "No real API request has been made; credentials must be supplied only as an environment variable on the execution host after configuration is pinned."
+    }
+  ],
+  "formal_experiment_started": false
+}

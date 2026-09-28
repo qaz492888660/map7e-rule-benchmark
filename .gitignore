@@ -39,3 +39,5 @@ env/
 .DS_Store
 runs/.work/
 runs/.locks/
+**/runs/.work/
+**/runs/.locks/
