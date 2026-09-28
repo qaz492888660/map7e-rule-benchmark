@@ -38,10 +38,11 @@
     "empty_resume": "PASS_NO_MODEL_REQUEST",
     "deduplication_guards": "PASS_TEMPORARY_TEST_ONLY",
     "secret_scan": "PASS_NO_MATCHES",
-    "github_readback": "PENDING",
+    "github_readback": "PASS",
     "formal_runs": "0/200",
     "pilot_runs": 0,
-    "model_calls_during_build": 0
+    "model_calls_during_build": 0,
+    "verified_remote_commit_sha": "38ca86698d2575c7d2a81658f799805f319be7db"
   },
   "blockers": [
     {
@@ -61,8 +62,8 @@
     },
     {
       "item": "Live durable persistence verification",
-      "status": "NOT_LIVE_VERIFIED",
-      "evidence": "The runner commits, pushes, and reads back raw run/index files from origin/main; this experiment-specific path has only been statically checked and not exercised with a run."
+      "status": "WRITE_CREDENTIAL_REQUIRED",
+      "evidence": "The source commit and files were persisted and read back from GitHub via the connected GitHub write path. The runner's per-run git push path has not been exercised; a direct git push from this runner host failed because HTTPS authentication could not read a username. A runner host with authenticated push/fetch access is required."
     },
     {
       "item": "Pilot API credential",
