@@ -1,5 +1,7 @@
-# Raw manual run records
+# Raw Manual Product run records
 
-No run records are present yet. Manual completed runs remain 0 / 40.
+No formal raw run records exist. Completed runs remain 0 / 40.
 
-After an actual new ChatGPT product conversation is completed, save its complete capture JSON here as `<run_id>.json`. Store only captured evidence; never synthesize missing output or trace. Keep screenshots in a private location unless intentionally reviewed for publication. Each record must use `rule_injection_level: USER_MESSAGE` and `execution_trace: NOT_AVAILABLE_IN_PRODUCT_UI`.
+Before recording a formal run, MP-ENV-SMOKE must pass. Each record must come from a separate Temporary Chat with Unpersonalized selected, Memory context OFF, Custom Instructions OFF, and a passing environment check.
+
+Set rule_injection_level to USER_MESSAGE and execution_trace to NOT_AVAILABLE_IN_PRODUCT_UI. Store only UI-visible evidence; do not infer hidden calls.

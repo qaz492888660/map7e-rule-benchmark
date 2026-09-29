@@ -60,10 +60,24 @@
         "Official policy source is unavailable or inconclusive"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T16-N22-R1",
@@ -112,10 +126,24 @@
         "Configured permission-denied error is returned"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle depends on the benchmark-only benchmark_fetch_url permission-denied fault injection while web_search is disabled. Standard ChatGPT product UI cannot reproduce this controlled tool/error environment."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查受控 URL / 故障注入能力是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_fetch_url"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T12-N22-R1",
@@ -158,10 +186,24 @@
         "History lookup returns no checklist"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "A fresh chat contains no prior testcase history. Search only history/memory actually available to the product; if UI does not expose a history lookup, record action attempt UNVERIFIABLE and disclose missing context."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查是否存在显式历史检索；不得默认 Memory 可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_history_lookup"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T19-C23-R1",
@@ -211,10 +253,25 @@
         "Search yields no usable rate or calculation fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires current web search for the exchange rate plus visible calculator/code execution for the conversion; if either is not visibly available, mark the corresponding action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。 需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search",
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T13-N22-R1",
@@ -271,10 +328,26 @@
         "Mutation or verification fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T08-C23-R1",
@@ -317,10 +390,24 @@
         "Image cannot be loaded or attached"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact fixtures/images/quadrants.png bytes. If that exact image cannot be attached/visually inspected, mark PRODUCT_INCOMPATIBLE without changing the testcase."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确图片 fixture 是否可上传并可见视觉处理。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "input_image"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T09-C23-R1",
@@ -368,10 +455,25 @@
         "Repository source is missing or search/read fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact T09 repository fixture (all relevant files/paths) from fixtures/workspaces/T09/repo. If exact snapshot cannot be provided, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并搜索。 需检查准确 repository fixture 能否提供并读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_search",
+          "benchmark_repo_read"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T07-N22-R1",
@@ -415,10 +517,24 @@
         "Attachment is missing or unreadable"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact fixtures/workspaces/T07/vendor-agreement.txt bytes. If that exact fixture cannot be attached/read, mark PRODUCT_INCOMPATIBLE without changing the testcase."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 fixture 是否可上传并可见读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_read_fixture"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T14-N22-R1",
@@ -471,10 +587,26 @@
         "Write or readback fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T15-C23-R1",
@@ -533,10 +665,26 @@
         "Edit/test/readback fails or tests return nonzero"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach exact T15 repository fixture. File editing and test execution require visibly available product workspace/code execution; absent these, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并读取。 需检查隔离文件写入能力是否真实可用。 需检查 fixture 测试能否在产品环境执行。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_read",
+          "benchmark_workspace_write",
+          "benchmark_run_tests"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T02-C23-R1",
@@ -578,10 +726,24 @@
         "No authoritative current release evidence is returned"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T18-C23-R1",
@@ -640,10 +802,26 @@
         "Configured write permission denial is returned"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires a benchmark-owned service fixture and controlled permission-denied write response followed by a fresh verification read. Standard ChatGPT product UI cannot reproduce these exact fixture tools."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T08-N22-R1",
@@ -686,10 +864,24 @@
         "Image cannot be loaded or attached"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact fixtures/images/quadrants.png bytes. If that exact image cannot be attached/visually inspected, mark PRODUCT_INCOMPATIBLE without changing the testcase."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确图片 fixture 是否可上传并可见视觉处理。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "input_image"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T09-N22-R1",
@@ -737,10 +929,25 @@
         "Repository source is missing or search/read fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact T09 repository fixture (all relevant files/paths) from fixtures/workspaces/T09/repo. If exact snapshot cannot be provided, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并搜索。 需检查准确 repository fixture 能否提供并读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_search",
+          "benchmark_repo_read"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T07-C23-R1",
@@ -784,10 +991,24 @@
         "Attachment is missing or unreadable"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact fixtures/workspaces/T07/vendor-agreement.txt bytes. If that exact fixture cannot be attached/read, mark PRODUCT_INCOMPATIBLE without changing the testcase."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 fixture 是否可上传并可见读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_read_fixture"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T11-N22-R1",
@@ -828,10 +1049,24 @@
         "No historical plan is returned"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "A fresh chat contains no prior testcase history. Search only history/memory actually available to the product; if UI does not expose a history lookup, record action attempt UNVERIFIABLE and disclose missing context."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查是否存在显式历史检索；不得默认 Memory 可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_history_lookup"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T20-N22-R1",
@@ -897,10 +1132,27 @@
         "The configured service update is denied or verification fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle combines repository fixture tools with benchmark-owned service mutation and post-action verification, including controlled write denial. Standard ChatGPT product UI cannot reproduce this exact isolated action environment."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并读取。 需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_read",
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T17-N22-R1",
@@ -942,10 +1194,24 @@
         "The file does not exist"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Do not attach a substitute file. The test intentionally requests a missing file; if product cannot attempt file lookup, record action attempt UNVERIFIABLE and do not invent content."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 fixture 是否可上传并可见读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_read_fixture"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T13-C23-R1",
@@ -1002,10 +1268,26 @@
         "Mutation or verification fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T03-C23-R1",
@@ -1048,10 +1330,24 @@
         "Official policy source is unavailable or inconclusive"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T10-N22-R1",
@@ -1102,10 +1398,25 @@
         "Search/read is incomplete or fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact T10 repository fixture (all relevant files/paths) from fixtures/workspaces/T10/repo. If exact snapshot or repository-wide review is unavailable, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并搜索。 需检查准确 repository fixture 能否提供并读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_search",
+          "benchmark_repo_read"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T14-C23-R1",
@@ -1158,10 +1469,26 @@
         "Write or readback fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T06-C23-R1",
@@ -1204,10 +1531,24 @@
         "A calculation cannot be completed"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "The oracle names benchmark_calculate. A visible product calculator/code execution may be recorded as equivalent evidence only when the UI shows the action/result; otherwise action attempt is UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T01-N22-R1",
@@ -1250,10 +1591,24 @@
         "web_search errors or returns no usable current quote"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T17-C23-R1",
@@ -1295,10 +1650,24 @@
         "The file does not exist"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Do not attach a substitute file. The test intentionally requests a missing file; if product cannot attempt file lookup, record action attempt UNVERIFIABLE and do not invent content."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 fixture 是否可上传并可见读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_read_fixture"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T02-N22-R1",
@@ -1340,10 +1709,24 @@
         "No authoritative current release evidence is returned"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T05-N22-R1",
@@ -1383,10 +1766,24 @@
         "Calculator rejects the expression or fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "The oracle names benchmark_calculate. A visible product calculator/code execution may be recorded as equivalent evidence only when the UI shows the action/result; otherwise action attempt is UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T04-C23-R1",
@@ -1428,10 +1825,24 @@
         "The name cannot be reliably disambiguated from available sources"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires visible web lookup of authoritative medicine/entity evidence; if unavailable, preserve uncertainty and mark action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T19-N22-R1",
@@ -1481,10 +1892,25 @@
         "Search yields no usable rate or calculation fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires current web search for the exchange rate plus visible calculator/code execution for the conversion; if either is not visibly available, mark the corresponding action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。 需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search",
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T04-N22-R1",
@@ -1526,10 +1952,24 @@
         "The name cannot be reliably disambiguated from available sources"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires visible web lookup of authoritative medicine/entity evidence; if unavailable, preserve uncertainty and mark action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T16-C23-R1",
@@ -1578,10 +2018,24 @@
         "Configured permission-denied error is returned"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle depends on the benchmark-only benchmark_fetch_url permission-denied fault injection while web_search is disabled. Standard ChatGPT product UI cannot reproduce this controlled tool/error environment."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查受控 URL / 故障注入能力是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_fetch_url"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T06-N22-R1",
@@ -1624,10 +2078,24 @@
         "A calculation cannot be completed"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "The oracle names benchmark_calculate. A visible product calculator/code execution may be recorded as equivalent evidence only when the UI shows the action/result; otherwise action attempt is UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T15-N22-R1",
@@ -1686,10 +2154,26 @@
         "Edit/test/readback fails or tests return nonzero"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach exact T15 repository fixture. File editing and test execution require visibly available product workspace/code execution; absent these, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并读取。 需检查隔离文件写入能力是否真实可用。 需检查 fixture 测试能否在产品环境执行。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_read",
+          "benchmark_workspace_write",
+          "benchmark_run_tests"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T18-N22-R1",
@@ -1748,10 +2232,26 @@
         "Configured write permission denial is returned"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle requires a benchmark-owned service fixture and controlled permission-denied write response followed by a fresh verification read. Standard ChatGPT product UI cannot reproduce these exact fixture tools."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T12-C23-R1",
@@ -1794,10 +2294,24 @@
         "History lookup returns no checklist"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "A fresh chat contains no prior testcase history. Search only history/memory actually available to the product; if UI does not expose a history lookup, record action attempt UNVERIFIABLE and disclose missing context."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查是否存在显式历史检索；不得默认 Memory 可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_history_lookup"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T01-C23-R1",
@@ -1840,10 +2354,24 @@
         "web_search errors or returns no usable current quote"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Requires the product UI to expose current web search/browsing; absent visible source/tool evidence, mark the action UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需实际检查当前界面是否显示搜索功能与结果。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "web_search"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T10-C23-R1",
@@ -1894,10 +2422,25 @@
         "Search/read is incomplete or fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "Attach the exact T10 repository fixture (all relevant files/paths) from fixtures/workspaces/T10/repo. If exact snapshot or repository-wide review is unavailable, mark PRODUCT_INCOMPATIBLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并搜索。 需检查准确 repository fixture 能否提供并读取。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_search",
+          "benchmark_repo_read"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T20-C23-R1",
@@ -1963,10 +2506,27 @@
         "The configured service update is denied or verification fails"
       ],
       "product_compatibility": {
-        "status": "PRODUCT_INCOMPATIBLE",
-        "reason": "The oracle combines repository fixture tools with benchmark-owned service mutation and post-action verification, including controlled write denial. Standard ChatGPT product UI cannot reproduce this exact isolated action environment."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查准确 repository fixture 能否提供并读取。 需检查 benchmark 专用服务状态读取工具是否真实可用。 需检查 benchmark 专用服务写操作是否真实可用。 需检查 benchmark 专用服务回读验证是否真实可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_repo_read",
+          "benchmark_service_read",
+          "benchmark_service_apply",
+          "benchmark_service_verify"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T05-C23-R1",
@@ -2006,10 +2566,24 @@
         "Calculator rejects the expression or fails"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "The oracle names benchmark_calculate. A visible product calculator/code execution may be recorded as equivalent evidence only when the UI shows the action/result; otherwise action attempt is UNVERIFIABLE."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查可见计算或代码执行；只看答案不证明工具调用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_calculate"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     },
     {
       "run_id": "MP-T11-C23-R1",
@@ -2050,21 +2624,66 @@
         "No historical plan is returned"
       ],
       "product_compatibility": {
-        "status": "CONDITIONAL_PRODUCT_PREFLIGHT",
-        "reason": "A fresh chat contains no prior testcase history. Search only history/memory actually available to the product; if UI does not expose a history lookup, record action attempt UNVERIFIABLE and disclose missing context."
+        "status": "REQUIRES_PREFLIGHT",
+        "reason": "MP-ENV-SMOKE 尚未执行，无法确认所需能力。需检查是否存在显式历史检索；不得默认 Memory 可用。"
       },
-      "planned_status": "NOT_RUN"
+      "planned_status": "NOT_RUN",
+      "chat_mode": "TEMPORARY",
+      "personalization": "OFF",
+      "memory_context": "OFF",
+      "custom_instructions": "OFF",
+      "model_ui": "NOT_VERIFIED",
+      "reasoning_ui": "NOT_VERIFIED",
+      "tool_availability": {
+        "status": "REQUIRES_PREFLIGHT",
+        "required_tools": [
+          "benchmark_history_lookup"
+        ],
+        "observed_in_product_ui": []
+      },
+      "environment_preflight_pass": "NOT_RUN"
     }
   ],
-  "product_incompatible_case_ids": [
-    "T13",
-    "T14",
-    "T16",
-    "T18",
-    "T20"
-  ],
-  "first_executable_run_id": "MP-T03-N22-R1",
+  "first_executable_run_id": null,
   "no_runs_executed": true,
   "testcase_source": "../../testcases.json",
-  "fixtures_root": "../../fixtures"
+  "fixtures_root": "../../fixtures",
+  "environment": {
+    "chat_mode": "TEMPORARY",
+    "personalization": "OFF",
+    "memory_context": "OFF",
+    "custom_instructions": "OFF",
+    "status": "REQUIRES_PREFLIGHT",
+    "smoke_id": "MP-ENV-SMOKE"
+  },
+  "product_compatibility_assessment": {
+    "status": "NOT_VERIFIED",
+    "requires_preflight_case_ids": [
+      "T01",
+      "T02",
+      "T03",
+      "T04",
+      "T05",
+      "T06",
+      "T07",
+      "T08",
+      "T09",
+      "T10",
+      "T11",
+      "T12",
+      "T13",
+      "T14",
+      "T15",
+      "T16",
+      "T17",
+      "T18",
+      "T19",
+      "T20"
+    ],
+    "product_compatible_case_ids": [],
+    "product_incompatible_case_ids": [],
+    "note": "No capability classification without actual product preflight."
+  },
+  "current_executability": "NO_FORMAL_RUN_EXECUTABLE_UNTIL_MP-ENV-SMOKE_PASSES",
+  "first_planned_formal_run_after_preflight": "MP-T03-N22-R1"
 }

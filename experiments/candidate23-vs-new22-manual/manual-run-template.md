@@ -1,56 +1,36 @@
 # Manual run capture template
 
-Use a new ChatGPT conversation for each run. The rule text is injected as a **user message**; do not describe it as system-level. Follow the randomized order in `manual-run-plan.json`.
+## Gate before any formal run
 
-## Before each run
+MP-ENV-SMOKE must pass first. For every planned run:
 
-- Confirm the run is not marked `PRODUCT_INCOMPATIBLE`.
-- Open a genuinely new chat with no prior testcase messages.
-- Record the visible ChatGPT model, reasoning setting, and tools available.
-- Attach the exact listed fixture bytes where required.
-- Send Message 1 from the run's prompt file, then send Message 2 unchanged as the second user message.
-- Do not add hints or corrective follow-ups before capturing the final answer.
+- Open a brand-new Temporary Chat.
+- Before sending any message, select Unpersonalized / non-personalized mode. Do not use Personalized Temporary Chat.
+- Confirm Memory context OFF and Custom Instructions OFF.
+- Confirm environment_preflight_pass for this exact chat before sending prompts.
+- Record exact visible ChatGPT model, reasoning setting, and tool availability.
+- If any required setting cannot be confirmed, do not send the rule or testcase; leave the run NOT_RUN.
+
+## Run procedure
+
+Use the randomized order in manual-run-plan.json. Each run gets its own Temporary Chat.
+
+1. Open the prompt file identified by the run ID.
+2. Send Message 1 body as the first user message.
+3. Attach only exact fixture bytes listed for that testcase.
+4. Send Message 2 unchanged as the second user message.
+5. Save the complete final answer and visible UI evidence.
+6. Save the raw record under manual-runs/<run_id>.json.
+7. Exit the chat. Do not save or continue it as the next run.
+
+Do not use one chat for both variants. The injection level is USER_MESSAGE; never label it system-level.
 
 ## Raw record
 
-Copy `manual-capture-schema.json` to a per-run JSON file under `manual-runs/`, then fill every field from the actual UI.
+Use manual-capture-schema.json. Capture chat_mode=TEMPORARY, personalization=OFF, memory_context=OFF, custom_instructions=OFF, rule_injection_level=USER_MESSAGE, exact model_ui and reasoning_ui, tool_availability, and environment_preflight_pass=true.
 
-```json
-{
-  "run_id": "",
-  "testcase_id": "",
-  "rule_version": "",
-  "rule_hash": "",
-  "rule_injection_level": "USER_MESSAGE",
-  "chatgpt_model_shown_in_ui": "",
-  "reasoning_setting": "NOT_SHOWN",
-  "timestamp_started": "",
-  "timestamp_finished": "",
-  "testcase_input": "",
-  "attachments_used": [],
-  "assistant_final_output": "",
-  "visible_tool_evidence": [],
-  "execution_trace": "NOT_AVAILABLE_IN_PRODUCT_UI",
-  "scores": {
-    "trigger_recognition": "UNVERIFIABLE",
-    "required_action_attempted": "UNVERIFIABLE",
-    "required_action_completed": "UNVERIFIABLE",
-    "evidence_binding": "UNVERIFIABLE",
-    "failure_state_compliance": "UNVERIFIABLE",
-    "false_completion": "UNVERIFIABLE",
-    "false_completion_count": null
-  },
-  "trace_confidence": "LOW",
-  "control_deviations": [],
-  "notes": ""
-}
-```
+For a run that fails preflight, do not create a formal raw run record; record the environment failure in the MP-ENV-SMOKE capture and keep completed runs at 0 / 40.
 
-## Evidence rules
+## Evidence boundary
 
-- A tool action counts as attempted only if visible UI evidence supports it. Otherwise use `UNVERIFIABLE`.
-- A visible tool call alone does not prove sufficient evidence or final-state verification.
-- Never infer hidden tool activity from assistant text.
-- Keep screenshots in a private evidence location and refer to them by path. Do not commit account details or unrelated personal information.
-- Mark an unexecutable unchanged testcase `PRODUCT_INCOMPATIBLE` with reason; do not fabricate a response or create a raw record for an unrun case.
-- The CSV and summary are planning templates until real runs are captured. Do not fill scores from expectations.
+Set execution_trace to NOT_AVAILABLE_IN_PRODUCT_UI. Record only UI-visible search, file, tool, and action evidence, actual uploaded fixtures, final output, and screenshots. A screenshot cannot prove calls the UI does not show. If evidence is insufficient, score the action UNVERIFIABLE.

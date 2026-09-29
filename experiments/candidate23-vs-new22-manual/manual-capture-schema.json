@@ -1,15 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Manual ChatGPT Product Run Capture",
+  "title": "Temporary Unpersonalized ChatGPT Product Run Capture",
   "type": "object",
   "required": [
     "run_id",
     "testcase_id",
     "rule_version",
     "rule_hash",
+    "chat_mode",
+    "personalization",
+    "memory_context",
+    "custom_instructions",
     "rule_injection_level",
-    "chatgpt_model_shown_in_ui",
-    "reasoning_setting",
+    "model_ui",
+    "reasoning_ui",
+    "tool_availability",
+    "environment_preflight_pass",
     "timestamp_started",
     "timestamp_finished",
     "testcase_input",
@@ -39,16 +45,59 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
+    "chat_mode": {
+      "const": "TEMPORARY"
+    },
+    "personalization": {
+      "const": "OFF"
+    },
+    "memory_context": {
+      "const": "OFF"
+    },
+    "custom_instructions": {
+      "const": "OFF"
+    },
     "rule_injection_level": {
       "const": "USER_MESSAGE"
     },
-    "chatgpt_model_shown_in_ui": {
+    "model_ui": {
       "type": "string",
       "minLength": 1
     },
-    "reasoning_setting": {
+    "reasoning_ui": {
       "type": "string",
-      "description": "Exact visible product setting if shown; otherwise NOT_SHOWN."
+      "minLength": 1
+    },
+    "tool_availability": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool_or_capability",
+          "available",
+          "visible_evidence"
+        ],
+        "properties": {
+          "tool_or_capability": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "visible_evidence": {
+            "type": "string"
+          },
+          "screenshot_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "environment_preflight_pass": {
+      "const": true
     },
     "timestamp_started": {
       "type": "string",

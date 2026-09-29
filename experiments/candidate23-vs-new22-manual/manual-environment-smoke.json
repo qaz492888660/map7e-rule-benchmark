@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "smoke_id": "MP-ENV-SMOKE",
+  "experiment_id": "CANDIDATE23_vs_NEW22_MANUAL_PRODUCT",
+  "status": "NOT_RUN",
+  "counts_toward_manual_runs": false,
+  "rule_variant": null,
+  "rule_injection_level": null,
+  "formal_run": false,
+  "model_requests_or_rule_comparison": "NONE",
+  "purpose": "Verify the product environment controls and visible tool evidence before any formal manual run.",
+  "procedure": [
+    "Create one new Temporary Chat and verify the UI visibly identifies it as Temporary.",
+    "Before sending any message, explicitly select Unpersonalized / non-personalized mode; ensure Personalized Temporary Chat is not selected.",
+    "Verify Memory context is OFF and Custom Instructions are OFF from actual UI controls/state. If either cannot be shown or established, mark the smoke FAIL and do not start formal runs.",
+    "Select one exact ChatGPT model shown in the UI and confirm it can be held fixed for this phase; record the visible label.",
+    "Select one exact reasoning setting if configurable and confirm it can be held fixed; if unavailable, record that limitation and mark the fixed-reasoning gate FAIL.",
+    "Inspect the actual UI tool menu/capabilities for web search, calculation/code execution, fixture file reading, image input/vision, repository/file access, history lookup, external actions, and post-action verification.",
+    "Record which tool actions and results the UI visibly exposes; do not infer hidden calls from answer text.",
+    "Save screenshots or equivalent visible evidence for chat mode, personalization, settings, and tool menu, then exit the Temporary Chat."
+  ],
+  "pass_criteria": [
+    "Temporary Chat visibly active.",
+    "Unpersonalized visibly selected before any message.",
+    "Memory context OFF and Custom Instructions OFF visibly confirmed.",
+    "A model label and reasoning setting can be recorded and held fixed, or the experiment remains blocked.",
+    "Tool availability and visible execution evidence are recorded per capability; unknowns remain unknown."
+  ],
+  "fail_behavior": "If a required control cannot be verified, leave all formal entries NOT_RUN, set environment_preflight_pass=false, and do not send any CANDIDATE23/NEW22 prompt or testcase.",
+  "evidence_fields": [
+    "started_at",
+    "finished_at",
+    "chat_mode_evidence",
+    "personalization_evidence",
+    "memory_context_evidence",
+    "custom_instructions_evidence",
+    "model_ui",
+    "reasoning_ui",
+    "tool_availability",
+    "visible_tool_evidence",
+    "screenshots",
+    "environment_preflight_pass",
+    "notes"
+  ]
+}

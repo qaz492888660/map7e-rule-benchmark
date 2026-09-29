@@ -1,21 +1,19 @@
 # Manual Product Phase 1 — Summary
 
 ## Status
-PREPARED_NOT_STARTED. Actual product runs: **0 / 40**. No model requests or ChatGPT conversations were run in this setup turn.
+PREPARED_NOT_STARTED. Formal Manual Product completed runs: **0 / 40**. No manual run or environment smoke was executed in this update.
 
-## Planned dataset
-20 original testcases, two rule variants, one repeat per testcase/rule (40 entries). The order is randomized and saved in `manual-run-plan.json`. All entries are NOT_RUN.
+## Environment and isolation
+Required for all future runs: a new Temporary Chat, Unpersonalized selected before the first message, Memory context OFF, Custom Instructions OFF, and rule_injection_level=USER_MESSAGE. These are protocol requirements; their actual product UI availability and effect remain unverified until MP-ENV-SMOKE passes. No formal run may start before that.
 
-## Rules
-CANDIDATE23 SHA-256: `11a649a605a041bd2dfaf1dec844661ad39879cd87ce6022aadb457a90b4a8b5`
-NEW22 SHA-256: `eddeb28b83ad1c7df91b855a169273dae35fbb4ae059be9624e0512ce9ba6d46`
-The rule text is delivered in a user message. This is not a system-level A/B test.
-
-## Compatibility
-Preflight identifies T13, T14, T16, T18, and T20 as PRODUCT_INCOMPATIBLE with the standard ChatGPT product UI because their oracle depends on benchmark-only service mutation/verification or controlled error injection. The remaining testcases have per-entry fixture/tool preflight requirements. No observed product result exists yet.
+## Dataset and compatibility
+The randomized 40-entry plan and 40 paired prompt files are preserved. Rule and testcase prompt bodies have not been changed. All T01–T20 are currently REQUIRES_PREFLIGHT; no testcase is yet classified PRODUCT_COMPATIBLE or PRODUCT_INCOMPATIBLE because the required product environment has not been tested.
 
 ## Results
-Not estimable before real captures. No pass rate, false-completion rate, or comparative conclusion is reported.
+No assistant outputs or run-level scores exist. Procedural compliance and False Completion rates are not estimable. Do not infer tool use from final text.
+
+## Trace handling
+execution_trace = NOT_AVAILABLE_IN_PRODUCT_UI. Only visible tool actions/results, actual uploaded fixture evidence, final answers, and screenshots may support scoring. Mark unseen actions UNVERIFIABLE.
 
 ## Interpretation limits
-This is a separate ChatGPT product dataset with user-message rule injection, weaker controls than the API benchmark, no complete internal execution trace, possible hidden system/developer instructions and memory, potentially changing model/tool availability, and a single repeat per case/rule. Do not combine it with API results or claim strict system-prompt A/B evidence.
+This is an independent ChatGPT product track with user-message rule injection, not system-level A/B. Product-level instructions may remain active; model and tool availability may change. There is no complete internal trace. Do not combine these observations with API benchmark results.

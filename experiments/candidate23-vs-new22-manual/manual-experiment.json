@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "experiment_id": "CANDIDATE23_vs_NEW22_MANUAL_PRODUCT",
-  "status": "PREPARED_NOT_STARTED",
+  "status": "PREPARED_NOT_STARTED_REQUIRES_ENVIRONMENT_PREFLIGHT",
   "purpose": "Observe procedural compliance and false completion in real ChatGPT product conversations under two user-message-injected rule texts.",
   "relationship_to_api_track": "Independent dataset. Do not merge manual product observations with CANDIDATE23_vs_NEW22_API results.",
   "platform": "ChatGPT product conversations",
@@ -43,11 +43,18 @@
     "same_exact_testcase_input": true,
     "only_intended_difference": "rule text in first user message",
     "record_deviations": true,
-    "tool_availability": "Must be recorded from the actual UI per run; if not visible, mark action attempt UNVERIFIABLE."
+    "tool_availability": "Must be recorded from the actual UI per run; if not visible, mark action attempt UNVERIFIABLE.",
+    "fresh_temporary_chat_per_run": true,
+    "unpersonalized_required": true,
+    "memory_off_required": true,
+    "custom_instructions_off_required": true,
+    "environment_preflight_pass_required": true,
+    "not_system_level_ab_test": true
   },
   "evidence": {
     "internal_execution_trace": "NOT_AVAILABLE_IN_PRODUCT_UI",
-    "screenshots": "Supplemental evidence only; cannot establish hidden tool calls."
+    "screenshots": "Supplemental evidence only; cannot establish hidden tool calls.",
+    "environment_smoke": "MP-ENV-SMOKE defined but not executed."
   },
   "interpretation_limits": [
     "Weaker control than API benchmark.",
@@ -71,5 +78,46 @@
     "reasoning_setting": "Record the exact visible setting, or NOT_SHOWN if unavailable; do not claim fixed when not selectable.",
     "tool_permissions": "Record the visible tool range and keep it the same across paired variants.",
     "note": "Product settings and availability have not been live-verified by executing a ChatGPT run."
-  }
+  },
+  "environment": {
+    "chat_mode": "TEMPORARY",
+    "personalization": "OFF",
+    "memory_context": "OFF",
+    "custom_instructions": "OFF",
+    "rule_injection_level": "USER_MESSAGE",
+    "status": "REQUIRES_PREFLIGHT",
+    "environment_smoke_id": "MP-ENV-SMOKE",
+    "environment_smoke_status": "NOT_RUN",
+    "note": "These are required controls. Their current product UI availability and actual effect have not been verified."
+  },
+  "product_compatibility": {
+    "status": "NOT_VERIFIED",
+    "compatible_case_ids": [],
+    "incompatible_case_ids": [],
+    "requires_preflight_case_ids": [
+      "T01",
+      "T02",
+      "T03",
+      "T04",
+      "T05",
+      "T06",
+      "T07",
+      "T08",
+      "T09",
+      "T10",
+      "T11",
+      "T12",
+      "T13",
+      "T14",
+      "T15",
+      "T16",
+      "T17",
+      "T18",
+      "T19",
+      "T20"
+    ],
+    "reason": "No product capability is classified until the unpersonalized Temporary Chat environment is actually preflighted."
+  },
+  "next_formal_run_after_preflight": "MP-T03-N22-R1",
+  "currently_executable_run_id": null
 }
