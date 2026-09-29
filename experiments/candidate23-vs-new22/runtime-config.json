@@ -1,17 +1,16 @@
 {
-  "schema_version": 1,
-  "experiment_id": "CANDIDATE23_vs_NEW22",
-  "config_status": "FROZEN",
-  "frozen_on": "2026-09-28",
-  "provider": "openai",
   "api": {
-    "family": "responses",
-    "endpoint": "https://api.openai.com/v1/responses",
+    "callability": {
+      "evidence": "No real API response has been obtained. model_not_found or access_denied must stop the run without fallback.",
+      "status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED"
+    },
     "credential_env": "OPENAI_API_KEY",
+    "endpoint": "https://api.openai.com/v1/responses",
     "exact_model_id": "gpt-5.6-sol",
+    "family": "responses",
     "model_id_evidence": {
-      "status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
-      "source": "https://platform.openai.com/docs/models",
+      "account_callability": "NOT_VERIFIED_REQUIRES_API_SMOKE_REQUEST",
+      "documentation_evidence": "Official OpenAI model documentation lists gpt-5.6-sol and medium reasoning. This is documentation evidence only; account-level API callability is not verified.",
       "documented_model_id": "gpt-5.6-sol",
       "documented_reasoning_efforts": [
         "none",
@@ -21,62 +20,112 @@
         "xhigh",
         "max"
       ],
-      "documentation_evidence": "Official OpenAI model documentation lists gpt-5.6-sol and medium reasoning. This is documentation evidence only; account-level API callability is not verified.",
-      "account_callability": "NOT_VERIFIED_REQUIRES_API_SMOKE_REQUEST"
-    },
-    "callability": {
-      "status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
-      "evidence": "No real API response has been obtained. model_not_found or access_denied must stop the run without fallback."
+      "source": "https://platform.openai.com/docs/models",
+      "status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED"
     }
   },
+  "config_status": "FROZEN",
+  "execution_environment": {
+    "image_fingerprint": "GitHub-hosted image version is recorded per run; actual Actions image has not been tested in this repository.",
+    "mode": "github_actions",
+    "pinning": "Fixed ubuntu-24.04 runner label and exact Python patch; runtime host image version is captured in each raw record.",
+    "platform_family": "Linux",
+    "python_version": "3.12.14",
+    "runner_label": "ubuntu-24.04",
+    "runner_sha256": "a2e02a2986b81490ced965fbdfbd1b98ab7580a090ec95de398450a49a16611d"
+  },
+  "execution_trace_capture": {
+    "api_smoke_method": "One forced diagnostic function_call in one real request; record response metadata and append its deterministic local tool result to trace without a second request.",
+    "pilot_method": "Preserve full Responses API request/response items, function calls/results, hosted web_search items, errors, and timestamps in each raw run.",
+    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED"
+  },
+  "experiment_id": "CANDIDATE23_vs_NEW22",
+  "frozen_on": "2026-09-28",
+  "generation": {
+    "max_output_tokens": 2000,
+    "temperature": {
+      "evidence": "The request omits temperature identically for all rule variants; no numeric value is asserted.",
+      "status": "OMITTED",
+      "value": null
+    }
+  },
+  "network_access": {
+    "evidence": "The Work executor is not used as the benchmark host. GitHub Actions connectivity remains unverified until manually dispatched runtime smoke modes.",
+    "github_https_remote": "NOT_TESTED_FROM_GITHUB_ACTIONS",
+    "openai_api_endpoint": "NOT_TESTED_FROM_GITHUB_ACTIONS"
+  },
+  "persistence": {
+    "credential_env": "GITHUB_TOKEN",
+    "credential_source": "GitHub Actions automatically provided github.token; no custom GITHUB_TOKEN secret is required.",
+    "credential_storage": "environment_only",
+    "durable_persistence": "VERIFIED",
+    "evidence": {
+      "create_commit": "f4cd3014a3a35e8ba0d1026d46981f1a7b5bb104",
+      "delete_commit": "4f10293f23aeea2fdc67e2cb74bb16f6286a2f6a",
+      "remote_create_readback": "CONTENT_MATCHED",
+      "remote_delete_readback": "ABSENT",
+      "smoke_id": "4d04ccf65c3f4cce8c615d38c18ae675",
+      "status": "VERIFIED",
+      "verified_at": "2026-09-29T03:29:07+00:00"
+    },
+    "method": "git_https",
+    "persistence_smoke_test": "PASS",
+    "remote_name": "origin"
+  },
+  "provider": "openai",
   "reasoning": {
     "effort": "medium",
-    "status": "OFFICIALLY_DOCUMENTED_AND_FIXED_NOT_LIVE_TESTED",
-    "source": "https://platform.openai.com/docs/models"
-  },
-  "generation": {
-    "temperature": {
-      "status": "OMITTED",
-      "value": null,
-      "evidence": "The request omits temperature identically for all rule variants; no numeric value is asserted."
-    },
-    "max_output_tokens": 2000
+    "source": "https://platform.openai.com/docs/models",
+    "status": "OFFICIALLY_DOCUMENTED_AND_FIXED_NOT_LIVE_TESTED"
   },
   "request": {
-    "timeout_seconds": 120,
-    "max_api_retries": 0,
     "api_request_attempts_per_round": 1,
+    "failure_policy": "Save error and partial trace; never silently retry a run or relabel it successful.",
+    "max_api_retries": 0,
     "max_tool_rounds": 8,
     "response_storage": false,
-    "failure_policy": "Save error and partial trace; never silently retry a run or relabel it successful."
+    "timeout_seconds": 120
+  },
+  "runtime_modes": {
+    "automatic_push_trigger": false,
+    "formal_runs_started": false,
+    "modes": [
+      "static_validation",
+      "persistence_smoke",
+      "api_smoke",
+      "pilot"
+    ],
+    "pilot_started": false,
+    "trigger": "workflow_dispatch_only",
+    "workflow": ".github/workflows/benchmark-pilot.yml"
+  },
+  "schema_version": 1,
+  "shared_instruction": {
+    "rule_injection": "Append exactly one selected rule body for each independent run.",
+    "same_for_both_rules": true,
+    "sha256": "38e9966786fb986fca20beba5f1856ab80391103d475364dc470e88f813107fe",
+    "source": "BASELINE constant in scripts/run-benchmark.py"
   },
   "state_policy": {
+    "conversation_id": "OMITTED",
+    "cross_run_messages_or_tool_state": false,
     "fresh_input_array_per_run": true,
     "previous_response_id": "OMITTED",
-    "conversation_id": "OMITTED",
     "response_store": false,
-    "cross_run_messages_or_tool_state": false,
     "within_run_tool_feedback": "Only the current run input, its own model output items, and its own tool results may be carried to a subsequent Responses request."
   },
-  "shared_instruction": {
-    "source": "BASELINE constant in scripts/run-benchmark.py",
-    "sha256": "38e9966786fb986fca20beba5f1856ab80391103d475364dc470e88f813107fe",
-    "same_for_both_rules": true,
-    "rule_injection": "Append exactly one selected rule body for each independent run."
+  "superseded_model_candidate": {
+    "model_id": "gpt-5.5-2026-04-23",
+    "reason": "Replaced by the user-selected current candidate before any real API callability test.",
+    "status": "CANCELLED_NOT_VERIFIED"
   },
   "tools": {
-    "native_api_tools": [
-      {
-        "type": "web_search"
-      }
-    ],
     "benchmark_function_tools": [
       {
-        "type": "function",
-        "name": "benchmark_calculate",
         "description": "Evaluate a numeric arithmetic expression for this testcase.",
+        "name": "benchmark_calculate",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "expression": {
               "type": "string"
@@ -85,16 +134,16 @@
           "required": [
             "expression"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_read_fixture",
         "description": "Read a UTF-8 file from this run's isolated testcase workspace; paths are relative to that workspace.",
+        "name": "benchmark_read_fixture",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "path": {
               "type": "string"
@@ -103,16 +152,16 @@
           "required": [
             "path"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_repo_search",
         "description": "Search source files in this run's isolated repo/ fixture and return matching paths and lines.",
+        "name": "benchmark_repo_search",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "query": {
               "type": "string"
@@ -121,16 +170,16 @@
           "required": [
             "query"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_repo_read",
         "description": "Read one file from this run's isolated repo/ fixture.",
+        "name": "benchmark_repo_read",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "path": {
               "type": "string"
@@ -139,16 +188,16 @@
           "required": [
             "path"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_history_lookup",
         "description": "Search only the history explicitly supplied to this independent run. This benchmark supplies no prior conversation history.",
+        "name": "benchmark_history_lookup",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "query": {
               "type": "string"
@@ -157,31 +206,30 @@
           "required": [
             "query"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_service_read",
         "description": "Read the current isolated service fixture state before an operation.",
+        "name": "benchmark_service_read",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {},
           "required": [],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_service_apply",
         "description": "Apply a JSON patch to the isolated service fixture state; configured permission failures are returned as errors.",
+        "name": "benchmark_service_apply",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "changes": {
-              "type": "object",
               "additionalProperties": {
                 "type": [
                   "string",
@@ -189,34 +237,35 @@
                   "boolean",
                   "null"
                 ]
-              }
+              },
+              "type": "object"
             }
           },
           "required": [
             "changes"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_service_verify",
         "description": "Freshly reread the isolated service fixture state after an attempted operation.",
+        "name": "benchmark_service_verify",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {},
           "required": [],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_fetch_url",
         "description": "A controlled URL-fetch tool for the testcase. Testcase fault injection is recorded in the execution trace.",
+        "name": "benchmark_fetch_url",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "url": {
               "type": "string"
@@ -225,21 +274,21 @@
           "required": [
             "url"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_workspace_write",
         "description": "Write UTF-8 content to an allowed file in the isolated run workspace.",
+        "name": "benchmark_workspace_write",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
-            "path": {
+            "content": {
               "type": "string"
             },
-            "content": {
+            "path": {
               "type": "string"
             }
           },
@@ -247,92 +296,46 @@
             "path",
             "content"
           ],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       },
       {
-        "type": "function",
-        "name": "benchmark_run_tests",
         "description": "Run the fixed Python unittest suite from the isolated repo/ fixture.",
+        "name": "benchmark_run_tests",
         "parameters": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {},
           "required": [],
-          "additionalProperties": false
+          "type": "object"
         },
-        "strict": true
+        "strict": true,
+        "type": "function"
       }
     ],
-    "catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2",
-    "image_input": {
-      "method": "Responses API input_image with local fixture bytes encoded as a base64 data URL",
-      "same_case_bytes_across_rules": true,
-      "official_support_source": "https://developers.openai.com/api/docs/guides/images-vision"
-    },
     "case_policy_source": "../../testcases.json: tool_policy.disable and fault_injection apply identically to both rule variants.",
+    "catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2",
+    "chatgpt_work_connectors_used": false,
     "fixture_implementations": {
-      "web_search": "OpenAI Responses hosted web_search; enabled unless a testcase explicitly disables it.",
       "calculator": "Runner deterministic arithmetic function benchmark_calculate.",
-      "file_read": "Runner benchmark_read_fixture over per-run copied fixture workspace.",
-      "repository": "Runner benchmark_repo_search and benchmark_repo_read over per-run repo fixtures.",
-      "history": "Runner benchmark_history_lookup; each independent run receives no past conversation, so the fixture returns an empty history result.",
       "external_action": "Runner benchmark_service_read, benchmark_service_apply, benchmark_service_verify operate on isolated JSON state fixtures.",
       "failure_injection": "Case-configured failures are returned as tool errors and included in execution trace.",
-      "other": "benchmark_workspace_write and benchmark_run_tests are local isolated fixture operations; benchmark_fetch_url only provides controlled fixture failures and is not general Internet access."
+      "file_read": "Runner benchmark_read_fixture over per-run copied fixture workspace.",
+      "history": "Runner benchmark_history_lookup; each independent run receives no past conversation, so the fixture returns an empty history result.",
+      "other": "benchmark_workspace_write and benchmark_run_tests are local isolated fixture operations; benchmark_fetch_url only provides controlled fixture failures and is not general Internet access.",
+      "repository": "Runner benchmark_repo_search and benchmark_repo_read over per-run repo fixtures.",
+      "web_search": "OpenAI Responses hosted web_search; enabled unless a testcase explicitly disables it."
     },
-    "chatgpt_work_connectors_used": false
-  },
-  "persistence": {
-    "method": "git_https",
-    "remote_name": "origin",
-    "credential_env": "GITHUB_TOKEN",
-    "credential_source": "GitHub Actions automatically provided github.token; no custom GITHUB_TOKEN secret is required.",
-    "credential_storage": "environment_only",
-    "durable_persistence": "BLOCKED",
-    "persistence_smoke_test": "IMPLEMENTED_NOT_RUN",
-    "evidence": {
-      "workflow_permissions": "contents: write configured; runtime permission not tested",
-      "workflow_checkout": "actions/checkout receives github.token; runtime push/readback not tested",
-      "remote_create_readback": "NOT_RUN",
-      "remote_delete_readback": "NOT_RUN"
-    }
-  },
-  "execution_environment": {
-    "mode": "github_actions",
-    "runner_label": "ubuntu-24.04",
-    "python_version": "3.12.14",
-    "platform_family": "Linux",
-    "image_fingerprint": "GitHub-hosted image version is recorded per run; actual Actions image has not been tested in this repository.",
-    "pinning": "Fixed ubuntu-24.04 runner label and exact Python patch; runtime host image version is captured in each raw record.",
-    "runner_sha256": "a2e02a2986b81490ced965fbdfbd1b98ab7580a090ec95de398450a49a16611d"
-  },
-  "network_access": {
-    "openai_api_endpoint": "NOT_TESTED_FROM_GITHUB_ACTIONS",
-    "github_https_remote": "NOT_TESTED_FROM_GITHUB_ACTIONS",
-    "evidence": "The Work executor is not used as the benchmark host. GitHub Actions connectivity remains unverified until manually dispatched runtime smoke modes."
-  },
-  "superseded_model_candidate": {
-    "model_id": "gpt-5.5-2026-04-23",
-    "status": "CANCELLED_NOT_VERIFIED",
-    "reason": "Replaced by the user-selected current candidate before any real API callability test."
-  },
-  "execution_trace_capture": {
-    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
-    "api_smoke_method": "One forced diagnostic function_call in one real request; record response metadata and append its deterministic local tool result to trace without a second request.",
-    "pilot_method": "Preserve full Responses API request/response items, function calls/results, hosted web_search items, errors, and timestamps in each raw run."
-  },
-  "runtime_modes": {
-    "workflow": ".github/workflows/benchmark-pilot.yml",
-    "trigger": "workflow_dispatch_only",
-    "modes": [
-      "static_validation",
-      "persistence_smoke",
-      "api_smoke",
-      "pilot"
-    ],
-    "automatic_push_trigger": false,
-    "formal_runs_started": false,
-    "pilot_started": false
+    "image_input": {
+      "method": "Responses API input_image with local fixture bytes encoded as a base64 data URL",
+      "official_support_source": "https://developers.openai.com/api/docs/guides/images-vision",
+      "same_case_bytes_across_rules": true
+    },
+    "native_api_tools": [
+      {
+        "type": "web_search"
+      }
+    ]
   }
 }

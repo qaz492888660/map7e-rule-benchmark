@@ -1,103 +1,13 @@
 {
-  "schema_version": 1,
-  "experiment_id": "CANDIDATE23_vs_NEW22",
-  "status": "READY_FOR_RUNTIME_SMOKE",
-  "formal_runs_completed": 0,
-  "pilot_runs_completed": 0,
-  "model_calls_made_during_build": false,
-  "controls": {
-    "only_rule_text_varies": true,
-    "model_id": "gpt-5.6-sol (configured, callable status unverified)",
-    "reasoning_effort": "medium (same for all modes and both rule variants)",
-    "temperature": "OMITTED",
-    "max_output_tokens": 2000,
-    "tool_permissions": "Same testcase-specific tool policy and runner catalog for both rules.",
-    "testcases": "Shared source ../../testcases.json; unchanged.",
-    "fixtures": "Shared source ../../fixtures/; unchanged.",
-    "scorer": "Shared scorer implementation; unchanged.",
-    "execution_environment": "GitHub Actions ubuntu-24.04 with Python 3.12.14; actual Actions runtime is not yet tested.",
-    "conversation_state": "Fresh independent Requests API context per run; store=false; no previous_response_id or conversation_id."
-  },
-  "verified_static_inputs": {
-    "CANDIDATE23": "VERIFIED_CANDIDATE23",
-    "NEW22": "VERIFIED_INPUT",
-    "rule_hashes_different": true,
-    "testcase_count": 20,
-    "planned_runs": 200,
-    "testcases_fixtures_oracles_run_plan_scorer_unchanged": true
-  },
-  "validation_results": {
-    "workflow_yaml": "PASS_LOCAL_PARSE",
-    "python_syntax": "PASS",
-    "runtime_config": "PASS_STATIC_MODEL_NOT_CALLABILITY_VERIFIED",
-    "model_status_not_callable_verified": "PASS_CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
-    "secret_handling": "PASS_STATIC",
-    "workflow_permissions": "PASS_STATIC_CONTENTS_WRITE_ONLY",
-    "mode_routing": "PASS_STATIC",
-    "persistence_smoke_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
-    "api_smoke_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
-    "pilot_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
-    "concurrency": "PASS_STATIC_SERIALIZED_NO_CANCEL",
-    "secret_scan": "PASS_NO_MATCHES",
-    "persistence_smoke": "NOT_RUN",
-    "api_smoke": "NOT_RUN_NO_API_CALL",
-    "execution_trace_live": "NOT_VERIFIED",
-    "formal_runs": "0/200",
-    "pilot_runs": "0/2",
-    "model_calls_during_build": 0,
-    "runner_dry_run": "PASS_BOTH_VARIANTS_NO_MODEL_REQUEST",
-    "empty_runs_scorer": "PASS_ZERO_ROWS",
-    "empty_resume": "PASS_NO_MODEL_REQUEST",
-    "deduplication_guard": "PASS_TEMPORARY_TEST_ONLY",
-    "dependency_lock_and_install": "PASS_PYYAML_6_0_3",
-    "work_sandbox_model_calls": "0",
-    "github_readback": "PASS_FOR_RUNTIME_COMMIT_b88497443f23e246d847a38ec53280562066e351",
-    "verified_remote_commit_sha": "b88497443f23e246d847a38ec53280562066e351"
-  },
-  "runtime_configuration": {
-    "status": "FROZEN",
-    "path": "runtime-config.json",
-    "exact_model_id": "gpt-5.6-sol",
-    "model_status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
-    "superseded_model": "gpt-5.5-2026-04-23 (CANCELLED_NOT_VERIFIED)",
-    "reasoning_effort": "medium",
-    "temperature": "OMITTED",
-    "max_output_tokens": 2000,
-    "timeout_seconds": 120,
-    "retry_policy": 0,
-    "tool_catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2",
-    "runner_sha256": "a2e02a2986b81490ced965fbdfbd1b98ab7580a090ec95de398450a49a16611d"
-  },
-  "tool_parity": {
-    "status": "STATICALLY_CONFIGURED_NOT_LIVE_VERIFIED",
-    "evidence": "Both rule variants use the same per-testcase local tool catalog, hosted web_search configuration, tool disables, fault injections, and fixture bytes. Live API-side behavior remains untested.",
-    "catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2",
-    "chatgpt_work_connectors_used": false
-  },
-  "independent_state": {
-    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
-    "evidence": "Each run creates a fresh input array, does not send previous_response_id or conversation_id, and sets store=false. This is statically implemented, not yet tested on GitHub Actions."
-  },
-  "execution_trace": {
-    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED",
-    "evidence": "API smoke records the real forced function_call response and appends the deterministic local diagnostic result; benchmark runner records API responses, hosted web_search events, function calls/results, errors, and timestamps. No live API trace has been obtained."
-  },
-  "persistence": {
-    "method": "git_https",
-    "status": "BLOCKED",
-    "credential_source": "GitHub Actions default github.token with contents: write",
-    "smoke_test": "IMPLEMENTED_NOT_RUN",
-    "work_connector_is_runner_credential": false
-  },
   "api_credential": {
     "environment_variable": "OPENAI_API_KEY",
     "source": "GitHub Actions Secret, injected only into api_smoke and pilot steps",
     "status": "NOT_CHECKED_NOT_REQUIRED_FOR_STATIC_VALIDATION"
   },
   "api_smoke": {
-    "status": "NOT_RUN",
+    "reason": "This build turn performs no API call.",
     "request_count": 0,
-    "reason": "This build turn performs no API call."
+    "status": "NOT_RUN"
   },
   "blockers_for_pilot": [
     "GitHub Actions persistence_smoke has not been run and remotely verified.",
@@ -105,6 +15,103 @@
     "A real API tool-call trace has not been captured.",
     "OPENAI_API_KEY Actions Secret availability has not been checked."
   ],
+  "controls": {
+    "conversation_state": "Fresh independent Requests API context per run; store=false; no previous_response_id or conversation_id.",
+    "execution_environment": "GitHub Actions ubuntu-24.04 with Python 3.12.14; actual Actions runtime is not yet tested.",
+    "fixtures": "Shared source ../../fixtures/; unchanged.",
+    "max_output_tokens": 2000,
+    "model_id": "gpt-5.6-sol (configured, callable status unverified)",
+    "only_rule_text_varies": true,
+    "reasoning_effort": "medium (same for all modes and both rule variants)",
+    "scorer": "Shared scorer implementation; unchanged.",
+    "temperature": "OMITTED",
+    "testcases": "Shared source ../../testcases.json; unchanged.",
+    "tool_permissions": "Same testcase-specific tool policy and runner catalog for both rules."
+  },
+  "execution_trace": {
+    "evidence": "API smoke records the real forced function_call response and appends the deterministic local diagnostic result; benchmark runner records API responses, hosted web_search events, function calls/results, errors, and timestamps. No live API trace has been obtained.",
+    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED"
+  },
+  "experiment_id": "CANDIDATE23_vs_NEW22",
   "formal_experiment_started": false,
-  "pilot_started": false
+  "formal_runs_completed": 0,
+  "independent_state": {
+    "evidence": "Each run creates a fresh input array, does not send previous_response_id or conversation_id, and sets store=false. This is statically implemented, not yet tested on GitHub Actions.",
+    "status": "IMPLEMENTED_NOT_LIVE_VERIFIED"
+  },
+  "model_calls_made_during_build": false,
+  "persistence": {
+    "evidence": {
+      "create_commit": "f4cd3014a3a35e8ba0d1026d46981f1a7b5bb104",
+      "delete_commit": "4f10293f23aeea2fdc67e2cb74bb16f6286a2f6a",
+      "remote_create_readback": "CONTENT_MATCHED",
+      "remote_delete_readback": "ABSENT",
+      "smoke_id": "4d04ccf65c3f4cce8c615d38c18ae675",
+      "status": "VERIFIED",
+      "verified_at": "2026-09-29T03:29:07+00:00"
+    },
+    "method": "GitHub Actions default GITHUB_TOKEN via git HTTPS",
+    "status": "VERIFIED"
+  },
+  "pilot_runs_completed": 0,
+  "pilot_started": false,
+  "runtime_configuration": {
+    "exact_model_id": "gpt-5.6-sol",
+    "max_output_tokens": 2000,
+    "model_status": "CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
+    "path": "runtime-config.json",
+    "reasoning_effort": "medium",
+    "retry_policy": 0,
+    "runner_sha256": "a2e02a2986b81490ced965fbdfbd1b98ab7580a090ec95de398450a49a16611d",
+    "status": "FROZEN",
+    "superseded_model": "gpt-5.5-2026-04-23 (CANCELLED_NOT_VERIFIED)",
+    "temperature": "OMITTED",
+    "timeout_seconds": 120,
+    "tool_catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2"
+  },
+  "schema_version": 1,
+  "status": "READY_FOR_RUNTIME_SMOKE",
+  "tool_parity": {
+    "catalog_sha256": "f9134184428581f234e0b26d688c5c6e66e74a75b5dc83d6d97897a2b981fdc2",
+    "chatgpt_work_connectors_used": false,
+    "evidence": "Both rule variants use the same per-testcase local tool catalog, hosted web_search configuration, tool disables, fault injections, and fixture bytes. Live API-side behavior remains untested.",
+    "status": "STATICALLY_CONFIGURED_NOT_LIVE_VERIFIED"
+  },
+  "validation_results": {
+    "api_smoke": "NOT_RUN_NO_API_CALL",
+    "api_smoke_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
+    "concurrency": "PASS_STATIC_SERIALIZED_NO_CANCEL",
+    "deduplication_guard": "PASS_TEMPORARY_TEST_ONLY",
+    "dependency_lock_and_install": "PASS_PYYAML_6_0_3",
+    "durable_persistence_smoke": "PASS",
+    "empty_resume": "PASS_NO_MODEL_REQUEST",
+    "empty_runs_scorer": "PASS_ZERO_ROWS",
+    "execution_trace_live": "NOT_VERIFIED",
+    "formal_runs": "0/200",
+    "github_readback": "PASS_FOR_RUNTIME_COMMIT_b88497443f23e246d847a38ec53280562066e351",
+    "mode_routing": "PASS_STATIC",
+    "model_calls_during_build": 0,
+    "model_status_not_callable_verified": "PASS_CONFIGURED_NOT_YET_CALLABLE_VERIFIED",
+    "persistence_smoke": "NOT_RUN",
+    "persistence_smoke_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
+    "pilot_flow": "PASS_STATIC_IMPLEMENTED_NOT_RUN",
+    "pilot_runs": "0/2",
+    "python_syntax": "PASS",
+    "runner_dry_run": "PASS_BOTH_VARIANTS_NO_MODEL_REQUEST",
+    "runtime_config": "PASS_STATIC_MODEL_NOT_CALLABILITY_VERIFIED",
+    "secret_handling": "PASS_STATIC",
+    "secret_scan": "PASS_NO_MATCHES",
+    "verified_remote_commit_sha": "b88497443f23e246d847a38ec53280562066e351",
+    "work_sandbox_model_calls": "0",
+    "workflow_permissions": "PASS_STATIC_CONTENTS_WRITE_ONLY",
+    "workflow_yaml": "PASS_LOCAL_PARSE"
+  },
+  "verified_static_inputs": {
+    "CANDIDATE23": "VERIFIED_CANDIDATE23",
+    "NEW22": "VERIFIED_INPUT",
+    "planned_runs": 200,
+    "rule_hashes_different": true,
+    "testcase_count": 20,
+    "testcases_fixtures_oracles_run_plan_scorer_unchanged": true
+  }
 }
