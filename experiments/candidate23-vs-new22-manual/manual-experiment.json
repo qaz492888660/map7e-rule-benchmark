@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "experiment_id": "CANDIDATE23_vs_NEW22_MANUAL_PRODUCT",
+  "status": "PREPARED_NOT_STARTED",
+  "purpose": "Observe procedural compliance and false completion in real ChatGPT product conversations under two user-message-injected rule texts.",
+  "relationship_to_api_track": "Independent dataset. Do not merge manual product observations with CANDIDATE23_vs_NEW22_API results.",
+  "platform": "ChatGPT product conversations",
+  "uses_openai_api": false,
+  "additional_api_billing": false,
+  "rule_injection_level": "USER_MESSAGE",
+  "not_system_level_ab_test": true,
+  "rule_variants": {
+    "CANDIDATE23": {
+      "source": "../../rules/CANDIDATE23.md",
+      "identity": "VERIFIED_CANDIDATE23",
+      "sha256": "11a649a605a041bd2dfaf1dec844661ad39879cd87ce6022aadb457a90b4a8b5"
+    },
+    "NEW22": {
+      "source": "../../rules/NEW22.md",
+      "identity": "CURRENT_FORMAL_NEW22",
+      "sha256": "eddeb28b83ad1c7df91b855a169273dae35fbb4ae059be9624e0512ce9ba6d46"
+    }
+  },
+  "design": {
+    "case_count": 20,
+    "rules": [
+      "CANDIDATE23",
+      "NEW22"
+    ],
+    "repeats_per_case_rule": 1,
+    "planned_runs": 40,
+    "completed_runs": 0,
+    "randomized_order_file": "manual-run-plan.json",
+    "testcase_source": "../../testcases.json",
+    "oracle_preserved": true,
+    "fixtures_source": "../../fixtures"
+  },
+  "controls": {
+    "fresh_chat_per_run": true,
+    "no_cross_run_history": true,
+    "same_visible_model_and_reasoning_required": true,
+    "same_visible_tool_range_required": true,
+    "same_exact_testcase_input": true,
+    "only_intended_difference": "rule text in first user message",
+    "record_deviations": true,
+    "tool_availability": "Must be recorded from the actual UI per run; if not visible, mark action attempt UNVERIFIABLE."
+  },
+  "evidence": {
+    "internal_execution_trace": "NOT_AVAILABLE_IN_PRODUCT_UI",
+    "screenshots": "Supplemental evidence only; cannot establish hidden tool calls."
+  },
+  "interpretation_limits": [
+    "Weaker control than API benchmark.",
+    "Not a strict system-prompt A/B test.",
+    "ChatGPT product hidden system/developer instructions may remain active.",
+    "Product model/version and available tools may change.",
+    "One repeat per case/rule has high sampling uncertainty.",
+    "No complete internal execution trace; manual observations are not comparable to API trace results."
+  ],
+  "product_incompatible_case_ids": [
+    "T13",
+    "T14",
+    "T16",
+    "T18",
+    "T20"
+  ],
+  "next_executable_run_id": "MP-T03-N22-R1",
+  "configuration_freeze": {
+    "status": "MUST_BE_CAPTURED_BEFORE_FIRST_RUN",
+    "model_shown_in_ui": "Not predetermined in this package; record the exact product label and hold it constant where the UI allows.",
+    "reasoning_setting": "Record the exact visible setting, or NOT_SHOWN if unavailable; do not claim fixed when not selectable.",
+    "tool_permissions": "Record the visible tool range and keep it the same across paired variants.",
+    "note": "Product settings and availability have not been live-verified by executing a ChatGPT run."
+  }
+}

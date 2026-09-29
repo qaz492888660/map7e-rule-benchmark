@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "experiment_id": "CANDIDATE23_vs_NEW22_API",
+  "status": "BLOCKED_BY_API_ACCESS",
+  "model_calls_made": 0,
+  "api_pilot": {
+    "completed": 0,
+    "target": 2
+  },
+  "api_formal_runs": {
+    "completed": 0,
+    "target": 200
+  },
+  "persistence_smoke": {
+    "status": "VERIFIED",
+    "create_commit": "f4cd3014a3a35e8ba0d1026d46981f1a7b5bb104",
+    "delete_commit": "4f10293f23aeea2fdc67e2cb74bb16f6286a2f6a"
+  },
+  "api_smoke": {
+    "status": "BLOCKED_BY_API_ACCESS",
+    "workflow_run_id": 36521225055,
+    "workflow_conclusion": "failure",
+    "secret_gate": "OPENAI_API_KEY_MISSING",
+    "request_sent": false,
+    "request_count": 0,
+    "api_response_obtained": false
+  },
+  "repository_secret": {
+    "name": "OPENAI_API_KEY",
+    "prior_value_status": "INVALID_SECRET_DO_NOT_USE",
+    "current_status": "REMOVED",
+    "value_read": false
+  },
+  "note": "No result, score, success rate, or experimental conclusion exists for the unexecuted API pilot/formal runs."
+}

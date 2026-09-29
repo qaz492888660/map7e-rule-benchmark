@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "experiment_id": "CANDIDATE23_vs_NEW22_MANUAL_PRODUCT",
+  "actual_failures": [],
+  "product_incompatible_cases": [
+    {
+      "testcase_id": "T13",
+      "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state.",
+      "affects_runs": [
+        "MP-T13-C23-R1",
+        "MP-T13-N22-R1"
+      ]
+    },
+    {
+      "testcase_id": "T14",
+      "reason": "The oracle requires benchmark_service_read/apply/verify against an isolated mutable JSON service fixture. Standard ChatGPT product UI does not expose that benchmark-owned service tool or isolated state.",
+      "affects_runs": [
+        "MP-T14-C23-R1",
+        "MP-T14-N22-R1"
+      ]
+    },
+    {
+      "testcase_id": "T16",
+      "reason": "The oracle depends on the benchmark-only benchmark_fetch_url permission-denied fault injection while web_search is disabled. Standard ChatGPT product UI cannot reproduce this controlled tool/error environment.",
+      "affects_runs": [
+        "MP-T16-C23-R1",
+        "MP-T16-N22-R1"
+      ]
+    },
+    {
+      "testcase_id": "T18",
+      "reason": "The oracle requires a benchmark-owned service fixture and controlled permission-denied write response followed by a fresh verification read. Standard ChatGPT product UI cannot reproduce these exact fixture tools.",
+      "affects_runs": [
+        "MP-T18-C23-R1",
+        "MP-T18-N22-R1"
+      ]
+    },
+    {
+      "testcase_id": "T20",
+      "reason": "The oracle combines repository fixture tools with benchmark-owned service mutation and post-action verification, including controlled write denial. Standard ChatGPT product UI cannot reproduce this exact isolated action environment.",
+      "affects_runs": [
+        "MP-T20-C23-R1",
+        "MP-T20-N22-R1"
+      ]
+    }
+  ],
+  "note": "No manual product runs have been performed; this file contains no run-level outcome or fabricated failure."
+}

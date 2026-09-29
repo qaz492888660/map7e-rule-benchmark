@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manual ChatGPT Product Run Capture",
+  "type": "object",
+  "required": [
+    "run_id",
+    "testcase_id",
+    "rule_version",
+    "rule_hash",
+    "rule_injection_level",
+    "chatgpt_model_shown_in_ui",
+    "reasoning_setting",
+    "timestamp_started",
+    "timestamp_finished",
+    "testcase_input",
+    "assistant_final_output",
+    "visible_tool_evidence",
+    "execution_trace",
+    "scores",
+    "trace_confidence",
+    "notes"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^MP-T[0-9]{2}-(C23|N22)-R1$"
+    },
+    "testcase_id": {
+      "type": "string",
+      "pattern": "^T[0-9]{2}$"
+    },
+    "rule_version": {
+      "enum": [
+        "CANDIDATE23",
+        "NEW22"
+      ]
+    },
+    "rule_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rule_injection_level": {
+      "const": "USER_MESSAGE"
+    },
+    "chatgpt_model_shown_in_ui": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reasoning_setting": {
+      "type": "string",
+      "description": "Exact visible product setting if shown; otherwise NOT_SHOWN."
+    },
+    "timestamp_started": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timestamp_finished": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "testcase_input": {
+      "type": "string"
+    },
+    "attachments_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assistant_final_output": {
+      "type": "string"
+    },
+    "visible_tool_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tool_or_ui_action",
+          "evidence_description"
+        ],
+        "properties": {
+          "tool_or_ui_action": {
+            "type": "string"
+          },
+          "evidence_description": {
+            "type": "string"
+          },
+          "screenshot_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "execution_trace": {
+      "const": "NOT_AVAILABLE_IN_PRODUCT_UI"
+    },
+    "scores": {
+      "type": "object",
+      "required": [
+        "trigger_recognition",
+        "required_action_attempted",
+        "required_action_completed",
+        "evidence_binding",
+        "failure_state_compliance",
+        "false_completion"
+      ],
+      "properties": {
+        "trigger_recognition": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNVERIFIABLE"
+          ]
+        },
+        "required_action_attempted": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNVERIFIABLE"
+          ]
+        },
+        "required_action_completed": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNVERIFIABLE"
+          ]
+        },
+        "evidence_binding": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNVERIFIABLE"
+          ]
+        },
+        "failure_state_compliance": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_TRIGGERED",
+            "UNVERIFIABLE"
+          ]
+        },
+        "false_completion": {
+          "enum": [
+            "YES",
+            "NO",
+            "UNVERIFIABLE"
+          ]
+        },
+        "false_completion_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "trace_confidence": {
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "control_deviations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
