@@ -10,7 +10,7 @@
   "rule_injection_level": null,
   "rules_injected": false,
   "model_requests_or_rule_comparison": "NONE",
-  "started_at": "2026-09-30T00:00:00Z",
+  "started_at": null,
   "finished_at": "2026-09-30T19:44:51.735Z",
   "environment_preflight_pass": false,
   "environment": {
@@ -110,5 +110,6 @@
     "api_formal": "0 / 200",
     "manual_product_formal_runs_added": 0
   },
-  "first_executable_run_id": null
+  "first_executable_run_id": null,
+  "started_at_note": "Not recorded; no exact start timestamp was captured."
 }
