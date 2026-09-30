@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "smoke_id": "MP-ENV-SMOKE",
+  "experiment_id": "CANDIDATE23_vs_NEW22_MANUAL_PRODUCT",
+  "source_main_commit": "144147edd26743d80dc401eeeefd75f9066df475",
+  "status": "MP_ENV_SMOKE_BLOCKED_PERSONALIZATION_UNVERIFIED",
+  "counts_toward_manual_runs": false,
+  "formal_run": false,
+  "rule_variant": null,
+  "rule_injection_level": null,
+  "rules_injected": false,
+  "model_requests_or_rule_comparison": "NONE",
+  "started_at": "2026-09-30T00:00:00Z",
+  "finished_at": "2026-09-30T19:44:51.735Z",
+  "environment_preflight_pass": false,
+  "environment": {
+    "product": "ChatGPT product UI",
+    "visible_url": "https://chatgpt.com/",
+    "sign_in_state": "SIGN_IN_PROMPT_VISIBLE",
+    "chat_mode": "UNVERIFIED",
+    "personalization": "UNVERIFIED",
+    "memory_context": "UNVERIFIED",
+    "custom_instructions": "UNVERIFIED",
+    "model_ui": "UNVERIFIABLE",
+    "reasoning_ui": "UNVERIFIABLE",
+    "evidence": [
+      "The ChatGPT landing UI displayed a sign-in prompt and text inviting sign-in for answers based on saved conversations, image creation, and file uploads.",
+      "The Settings panel was opened. Its observed accessibility state showed General (appearance and language) and Data Controls; it did not expose an explicit Temporary + Unpersonalized selection or explicit Memory OFF / Custom Instructions OFF state.",
+      "Because the required controls could not be explicitly verified before any message, the smoke stopped before sending any prompt."
+    ]
+  },
+  "capabilities": {
+    "ordinary_text_input": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: mandatory Temporary + Unpersonalized gate was not verified; no prompt was sent."
+    },
+    "web_search": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no smoke prompt was sent."
+    },
+    "precise_calculation": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no smoke prompt was sent."
+    },
+    "fixture_file_read": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no fixture was uploaded; mandatory environment gate failed."
+    },
+    "image_visual_read": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no image was uploaded; mandatory environment gate failed."
+    },
+    "history_memory_isolation": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Unverified: account/session state and Unpersonalized mode could not be confirmed."
+    },
+    "repository_github": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no repository tool request was made."
+    },
+    "external_action_and_post_action_verification": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no external action was attempted."
+    },
+    "visible_tool_execution_evidence": {
+      "status": "UNVERIFIABLE",
+      "evidence": "Not probed: no tool-triggering prompt was sent."
+    },
+    "complete_execution_trace": {
+      "status": "UNVERIFIABLE",
+      "evidence": "No probe was run. Product protocol notes internal trace as NOT_AVAILABLE_IN_PRODUCT_UI."
+    }
+  },
+  "execution_trace": "NOT_AVAILABLE_IN_PRODUCT_UI",
+  "trace_note": "No tool call was attempted or inferred; no smoke probe prompt was sent.",
+  "screenshots": [],
+  "screenshot_note": "No screenshot file was saved; the blocked decision is based on the observed product UI accessibility state.",
+  "testcase_compatibility": {
+    "status": "NOT_REASSESSED_SMOKE_BLOCKED",
+    "requires_preflight_case_ids": [
+      "T01",
+      "T02",
+      "T03",
+      "T04",
+      "T05",
+      "T06",
+      "T07",
+      "T08",
+      "T09",
+      "T10",
+      "T11",
+      "T12",
+      "T13",
+      "T14",
+      "T15",
+      "T16",
+      "T17",
+      "T18",
+      "T19",
+      "T20"
+    ],
+    "product_compatible_case_ids": [],
+    "product_incompatible_case_ids": [],
+    "note": "MP-ENV-SMOKE did not pass its environment gate; preserve all existing REQUIRES_PREFLIGHT classifications."
+  },
+  "counts": {
+    "manual_product_completed": "0 / 40",
+    "api_experiment": "BLOCKED_BY_API_ACCESS",
+    "api_pilot": "0 / 2",
+    "api_formal": "0 / 200",
+    "manual_product_formal_runs_added": 0
+  },
+  "first_executable_run_id": null
+}
